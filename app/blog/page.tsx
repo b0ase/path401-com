@@ -22,6 +22,13 @@ const fadeIn = {
 
 const posts = [
   {
+    title: 'DNS-DEX: The Stock Exchange Where Every Ticker Is a URL',
+    description: 'How a TXT record, a token, and a 51% vote turn any domain name into a publicly traded company.',
+    href: 'https://b0ase.com/blog/dns-dex-stock-exchange-urls',
+    date: '2026-02-09',
+    tag: 'dns-dex',
+  },
+  {
     title: '$401: The Cinema Ticket and the ID Check',
     description: 'A standard for proving who you are, what you own, and what you\'re willing to stake your name on.',
     href: 'https://b0ase.com/blog/401-cinema-ticket-id-check',
