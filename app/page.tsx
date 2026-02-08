@@ -43,30 +43,28 @@ export default function Home() {
 
       {/* ═══ HERO ═══ */}
       <section className="relative min-h-[80vh] flex flex-col justify-center overflow-hidden bg-black">
-        {/* Background glow */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div
-            className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[700px]"
-            style={{
-              background: 'radial-gradient(ellipse at center, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.03) 35%, transparent 70%)',
-            }}
-          />
-        </div>
+        {/* Background video */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-30"
+        >
+          <source src="/401-8.mp4" type="video/mp4" />
+        </video>
 
-        {/* Dot grid */}
+        {/* Background texture */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-          }}
+          className="absolute inset-0 pointer-events-none bg-cover bg-center opacity-40"
+          style={{ backgroundImage: 'url(/hero-bg.png)' }}
         />
 
         {/* CRT vignette */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5) 100%)',
+            background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%)',
           }}
         />
 
@@ -209,6 +207,13 @@ export default function Home() {
         <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
           <motion.div custom={0} variants={fadeIn} className="section-label">
             The Third Way
+          </motion.div>
+          <motion.div custom={0.05} variants={fadeIn} className="mb-6 border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+            <img
+              src="/third-way.png"
+              alt="Three approaches to identity: surveillance, corporate, and peer-underwritten"
+              className="w-full h-auto opacity-80 dark:opacity-60"
+            />
           </motion.div>
           <div className="grid md:grid-cols-3 gap-0 border border-zinc-200 dark:border-zinc-800">
             <motion.div custom={0.1} variants={fadeUp} className="p-8 md:p-10 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800">
@@ -534,6 +539,13 @@ export default function Home() {
             Trust Score
           </motion.div>
           <div className="border border-zinc-200 dark:border-zinc-800">
+            <motion.div custom={0.05} variants={fadeIn} className="border-b border-zinc-200 dark:border-zinc-800 overflow-hidden">
+              <img
+                src="/trust-score.png"
+                alt="Four trust levels from self-declared to institutionally verified"
+                className="w-full h-auto max-h-64 object-contain mx-auto opacity-80 dark:opacity-60 py-6"
+              />
+            </motion.div>
             <motion.div custom={0.1} variants={fadeUp} className="p-8 md:p-12">
               <h2 className="text-2xl md:text-3xl font-black tracking-tighter mb-6 font-display">
                 NOT A SOCIAL CREDIT SCORE<span className="text-violet-500">.</span>
