@@ -22,6 +22,13 @@ const fadeIn = {
 
 const posts = [
   {
+    title: '$401: The Cinema Ticket and the ID Check',
+    description: 'A standard for proving who you are, what you own, and what you\'re willing to stake your name on.',
+    href: 'https://b0ase.com/blog/401-cinema-ticket-id-check',
+    date: '2026-02-09',
+    tag: 'identity',
+  },
+  {
     title: '$401 and $402: Red Blood and Blue Blood',
     description: 'Why identity tokens flow one way, content tokens flow the other, and neither one is money.',
     href: 'https://b0ase.com/blog/401-402-red-blue-blood',
