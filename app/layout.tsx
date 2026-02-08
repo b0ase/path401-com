@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: "$401 Identity Protocol",
     locale: "en_US",
     type: "website",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
@@ -45,11 +45,11 @@ export const metadata: Metadata = {
     description: "Self-sovereign identity on the blockchain.",
     creator: "@b0ase",
     site: "@b0ase",
-    images: ["/og-image.png"],
+    images: ["/og-image.jpg"],
   },
   icons: {
-    icon: "/og-image.png",
-    apple: "/og-image.png",
+    icon: "/favicon.jpg",
+    apple: "/favicon.jpg",
   },
   robots: {
     index: true,
