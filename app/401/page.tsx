@@ -116,7 +116,7 @@ export default function Page401() {
             initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease }}
-            className="font-display font-black tracking-tighter leading-[0.85] mb-2"
+            className="font-display font-black tracking-tighter leading-[0.85] mb-0"
             style={{
               fontSize: 'clamp(4rem, 12vw, 12rem)',
               textShadow: '0 0 10px rgba(239, 68, 68, 0.4), 0 0 30px rgba(239, 68, 68, 0.2), 0 0 60px rgba(239, 68, 68, 0.1)',
@@ -127,7 +127,7 @@ export default function Page401() {
 
           {/* Reflection */}
           <div
-            className="relative overflow-hidden h-12 md:h-20 select-none mb-8"
+            className="relative overflow-hidden h-6 md:h-10 select-none mb-0"
             aria-hidden="true"
             style={{
               transform: 'scaleY(-1)',
@@ -149,7 +149,7 @@ export default function Page401() {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="mb-2"
           >
-            <span className="text-zinc-400 text-2xl md:text-4xl tracking-[0.3em] uppercase font-display font-black">
+            <span className="text-zinc-400 text-xl md:text-2xl tracking-[0.3em] uppercase font-display font-black">
               PATH 401 &mdash; FOLLOW YOUR OWN PATH
             </span>
           </motion.div>
