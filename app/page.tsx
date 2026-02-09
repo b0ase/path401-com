@@ -1,14 +1,23 @@
 'use client';
 
-import Link from 'next/link';
-import { motion } from 'framer-motion';
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { useWallet } from "@/components/WalletProvider";
+import { useEffect, useState } from "react";
+import Hero401 from "@/components/heroes/Hero401";
+import Hero403 from "@/components/heroes/Hero403";
+
+const SITE_VARIANT = process.env.NEXT_PUBLIC_SITE_VARIANT || '402';
+
+// ── Animation variants ──────────────────────────────────────────
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (delay: number) => ({
-    opacity: 1, y: 0,
+    opacity: 1,
+    y: 0,
     transition: { duration: 0.8, delay, ease }
   })
 };
@@ -24,7 +33,8 @@ const fadeIn = {
 const scaleIn = {
   hidden: { opacity: 0, scale: 0.9 },
   visible: (delay: number) => ({
-    opacity: 1, scale: 1,
+    opacity: 1,
+    scale: 1,
     transition: { duration: 0.7, delay, ease }
   })
 };
@@ -32,695 +42,1304 @@ const scaleIn = {
 const slideRight = {
   hidden: { opacity: 0, x: -40 },
   visible: (delay: number) => ({
-    opacity: 1, x: 0,
+    opacity: 1,
+    x: 0,
     transition: { duration: 0.6, delay, ease }
   })
 };
 
-export default function Home() {
+// ── Boot Sequence Hero ──────────────────────────────────────────
+
+const DATA_STREAM = '0xF402 \u25C6 NODE_17 \u25C6 PEER_ACK \u25C6 0x00FF \u25C6 BLOCK_9814 \u25C6 TX_VALID \u25C6 STAMP_OK \u25C6 0xDEAD \u25C6 ROUTE_P2P \u25C6 HASH_SHA256 \u25C6 NOISE_HANDSHAKE \u25C6 BSV21_MINT \u25C6 ';
+
+const NODE_LABELS = [
+  { label: 'NODE_01', x: '12%', y: '25%', delay: 0.2 },
+  { label: 'PEER_08', x: '82%', y: '18%', delay: 0.6 },
+  { label: 'IDX_03', x: '8%', y: '72%', delay: 0.4 },
+  { label: 'RELAY_12', x: '88%', y: '68%', delay: 0.8 },
+  { label: 'MINER_05', x: '70%', y: '82%', delay: 1.0 },
+  { label: 'TX_POOL', x: '20%', y: '85%', delay: 0.3 },
+];
+
+const SYSTEM_READOUT = [
+  { label: 'PROTOCOL', value: 'HTTP 402', color: 'text-zinc-600' },
+  { label: 'NETWORK', value: 'BSV MAINNET', color: 'text-zinc-600' },
+  { label: 'TRANSPORT', value: 'NOISE/P2P', color: 'text-zinc-600' },
+  { label: 'STATUS', value: 'OPERATIONAL', color: 'text-green-600' },
+  { label: 'PEERS', value: '142', color: 'text-zinc-600' },
+  { label: 'BLOCK', value: '891,247', color: 'text-zinc-600' },
+];
+
+function BootSequenceHero() {
+  const [phase, setPhase] = useState(0); // 0=black, 1=booting, 2=title, 3=content
+  const [bootLines, setBootLines] = useState<string[]>([]);
+  const [particles, setParticles] = useState<Array<{
+    id: number; x: number; y: number; size: number; opacity: number; duration: number; delay: number;
+  }>>([]);
+
+  const BOOT_MESSAGES = [
+    'INITIALIZING PROTOCOL STACK...',
+    'LOADING NOISE TRANSPORT LAYER...',
+    'GOSSIP NETWORK: SCANNING BOOTSTRAP NODES...',
+    'POW20 ENGINE: READY',
+    'BSV-21 TOKEN INDEXER: ONLINE',
+    'P2P CONTENT MESH: ACTIVATED',
+    'SYSTEM OPERATIONAL \u2014 AWAITING OPERATOR',
+  ];
+
+  // Generate particles on client only to avoid hydration mismatch
+  useEffect(() => {
+    setParticles(Array.from({ length: 60 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 2 + 0.5,
+      opacity: Math.random() * 0.4 + 0.05,
+      duration: Math.random() * 20 + 15,
+      delay: Math.random() * 10,
+    })));
+  }, []);
+
+  // Boot sequence — all timers in one effect to avoid strict mode issues
+  useEffect(() => {
+    let cancelled = false;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    // Phase 0 → 1: start boot after 400ms
+    timers.push(setTimeout(() => {
+      if (cancelled) return;
+      setPhase(1);
+
+      // Phase 1: type boot lines
+      let i = 0;
+      interval = setInterval(() => {
+        if (cancelled) { interval && clearInterval(interval); return; }
+        if (i < BOOT_MESSAGES.length) {
+          setBootLines(prev => [...prev, BOOT_MESSAGES[i]]);
+          i++;
+        } else {
+          interval && clearInterval(interval);
+          // Phase 1 → 2: title reveal
+          timers.push(setTimeout(() => {
+            if (cancelled) return;
+            setPhase(2);
+            // Phase 2 → 3: full content
+            timers.push(setTimeout(() => {
+              if (cancelled) return;
+              setPhase(3);
+            }, 800));
+          }, 300));
+        }
+      }, 150);
+    }, 400));
+
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+      if (interval) clearInterval(interval);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-white">
+    <section className="relative min-h-[100vh] flex flex-col justify-center overflow-hidden bg-black">
 
-      {/* ═══ HERO ═══ */}
-      <section className="relative min-h-[80vh] flex flex-col justify-center overflow-hidden bg-black">
-        {/* Background video */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-30"
-        >
-          <source src="/401-8.mp4" type="video/mp4" />
-        </video>
+      {/* ═══════════ BACKGROUND VIDEO ═══════════ */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover opacity-20 z-0"
+      >
+        <source src="/402-hero.mp4" type="video/mp4" />
+      </video>
 
-        {/* Background texture */}
+      {/* ═══════════ BACKGROUND LAYERS ═══════════ */}
+
+      {/* Layer 1: Radial blue glow behind title */}
+      <div className="absolute inset-0 pointer-events-none z-0">
         <div
-          className="absolute inset-0 pointer-events-none bg-cover bg-center opacity-40"
-          style={{ backgroundImage: 'url(/hero-bg.png)' }}
-        />
-
-        {/* CRT vignette */}
-        <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[800px]"
           style={{
-            background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%)',
+            background: 'radial-gradient(ellipse at center, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.04) 35%, transparent 70%)',
           }}
         />
+      </div>
 
-        {/* HUD corners */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-6 left-6 w-12 h-12 border-l-2 border-t-2 border-violet-500/10" />
-          <div className="absolute top-6 right-6 w-12 h-12 border-r-2 border-t-2 border-violet-500/10" />
-          <div className="absolute bottom-6 left-6 w-12 h-12 border-l-2 border-b-2 border-violet-500/10" />
-          <div className="absolute bottom-6 right-6 w-12 h-12 border-r-2 border-b-2 border-violet-500/10" />
-          <div className="absolute top-8 left-20 text-[7px] font-mono text-zinc-700 tracking-[0.25em]">
-            IDENTITY PROTOCOL v1.0
-          </div>
-          <div className="absolute bottom-8 left-20 text-[7px] font-mono text-zinc-700 tracking-[0.25em]">
-            HTTP 401: UNAUTHORIZED
-          </div>
+      {/* Layer 2: Dot grid pattern */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0 opacity-[0.04]"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+        }}
+      />
+
+      {/* Layer 3: Animated floating particles */}
+      <div className="absolute inset-0 pointer-events-none z-[1]">
+        {particles.map(p => (
+          <div
+            key={p.id}
+            className="absolute rounded-full bg-white"
+            style={{
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              width: `${p.size}px`,
+              height: `${p.size}px`,
+              opacity: p.opacity,
+              animation: `float-drift ${p.duration}s ${p.delay}s ease-in-out infinite`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Layer 4: Pulsing concentric rings */}
+      <div className="absolute inset-0 pointer-events-none z-[2] overflow-hidden">
+        {[0, 1, 2, 3].map(i => (
+          <div
+            key={i}
+            className="absolute rounded-full border border-white/[0.03]"
+            style={{
+              left: '33%',
+              top: '50%',
+              width: `${300 + i * 220}px`,
+              height: `${300 + i * 220}px`,
+              marginLeft: `-${(300 + i * 220) / 2}px`,
+              marginTop: `-${(300 + i * 220) / 2}px`,
+              animation: `ring-pulse ${4 + i * 0.7}s ${i * 1}s ease-out infinite`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Layer 5: Fine grid lines */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 opacity-[0.015]" style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+        }} />
+      </div>
+
+      {/* Layer 6: Scanline overlay */}
+      <div className="absolute inset-0 pointer-events-none z-[3] overflow-hidden opacity-[0.03]">
+        <div className="w-full h-[2px] bg-white animate-scanline" />
+      </div>
+
+      {/* Layer 7: CRT vignette */}
+      <div
+        className="absolute inset-0 pointer-events-none z-[4]"
+        style={{
+          background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5) 100%)',
+        }}
+      />
+
+      {/* ═══════════ HUD FRAME ═══════════ */}
+      <div className="absolute inset-0 pointer-events-none z-[5]">
+        {/* Corner brackets */}
+        <div className="absolute top-6 left-6 w-16 h-16 border-l-2 border-t-2 border-white/[0.08]" />
+        <div className="absolute top-6 right-6 w-16 h-16 border-r-2 border-t-2 border-white/[0.08]" />
+        <div className="absolute bottom-6 left-6 w-16 h-16 border-l-2 border-b-2 border-white/[0.08]" />
+        <div className="absolute bottom-6 right-6 w-16 h-16 border-r-2 border-b-2 border-white/[0.08]" />
+
+        {/* Inner corner accents */}
+        <div className="absolute top-6 left-6 w-4 h-4 border-l border-t border-white/20" />
+        <div className="absolute top-6 right-6 w-4 h-4 border-r border-t border-white/20" />
+        <div className="absolute bottom-6 left-6 w-4 h-4 border-l border-b border-white/20" />
+        <div className="absolute bottom-6 right-6 w-4 h-4 border-r border-b border-white/20" />
+
+        {/* Corner data labels */}
+        <div className="absolute top-8 left-24 text-[7px] font-mono text-zinc-700 tracking-[0.25em]">
+          PATH402 PROTOCOL v1.0
+        </div>
+        <div className="absolute top-8 right-24 text-[7px] font-mono text-zinc-700 tracking-[0.25em] text-right hidden md:block">
+          08.FEB.2026 // MAINNET
+        </div>
+        <div className="absolute bottom-8 left-24 text-[7px] font-mono text-zinc-700 tracking-[0.25em]">
+          BSV-21 // POW20 // NOISE
+        </div>
+        <div className="absolute bottom-8 right-24 text-[7px] font-mono text-zinc-700 tracking-[0.25em] text-right hidden md:block">
+          NODES: 142 \u25C6 LAT: 23ms
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 px-6 md:px-16 max-w-[1920px] mx-auto w-full">
-          <div className="flex flex-col lg:flex-row lg:items-stretch lg:gap-12">
-            {/* ═══ LEFT: Title + CTA ═══ */}
-            <div className="flex-1 min-w-0">
+        {/* Thin edge lines */}
+        <div className="absolute top-6 left-24 right-24 h-[1px] bg-gradient-to-r from-white/[0.04] via-transparent to-white/[0.04]" />
+        <div className="absolute bottom-6 left-24 right-24 h-[1px] bg-gradient-to-r from-white/[0.04] via-transparent to-white/[0.04]" />
+      </div>
+
+      {/* ═══════════ BOOT SEQUENCE TEXT (left) ═══════════ */}
+      <AnimatePresence>
+        {phase >= 1 && phase < 3 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.5 } }}
+            className="absolute top-16 left-8 md:left-28 z-20 font-mono"
+          >
+            {bootLines.map((line, i) => (
               <motion.div
-                initial={{ opacity: 0, x: -30 }}
+                key={i}
+                initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.1, ease }}
-                className="flex items-center gap-3 mb-6"
+                transition={{ duration: 0.15 }}
+                className={`text-[10px] tracking-wider mb-1 ${
+                  i === bootLines.length - 1 ? 'text-green-500' : 'text-zinc-700'
+                }`}
               >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-500 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500" />
-                </span>
-                <span className="text-zinc-600 text-[10px] tracking-[0.3em] uppercase font-mono font-bold">
-                  HTTP 401 : UNAUTHORIZED &mdash; PROVE WHO YOU ARE
-                </span>
+                <span className="text-zinc-800 mr-2">[{String(i).padStart(2, '0')}]</span>
+                {line}
               </motion.div>
+            ))}
+            {phase === 1 && (
+              <span className="inline-block w-2 h-3 bg-green-500 animate-blink ml-1 mt-1" />
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-              {/* ═══ THE MASSIVE $401 TITLE ═══ */}
-              <div className="relative mb-0">
-                <motion.h1
-                  className="font-display font-black tracking-tighter leading-[0.85]"
-                  style={{ fontSize: 'clamp(5rem, 12vw, 12rem)' }}
-                >
-                  <motion.span
-                    initial={{ opacity: 0, y: 60 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2, ease }}
-                    className="inline-block text-white"
-                    style={{ textShadow: '0 0 10px rgba(139, 92, 246, 0.4), 0 0 30px rgba(139, 92, 246, 0.2), 0 0 60px rgba(139, 92, 246, 0.1)' }}
-                  >
-                    $
-                  </motion.span>
-                  <motion.span
-                    initial={{ opacity: 0, y: 60 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.35, ease }}
-                    className="inline-block text-white"
-                    style={{ textShadow: '0 0 10px rgba(139, 92, 246, 0.4), 0 0 30px rgba(139, 92, 246, 0.2), 0 0 60px rgba(139, 92, 246, 0.1)' }}
-                  >
-                    4
-                  </motion.span>
-                  <motion.span
-                    initial={{ opacity: 0, y: 60 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.45, ease }}
-                    className="inline-block text-white"
-                    style={{ textShadow: '0 0 10px rgba(139, 92, 246, 0.4), 0 0 30px rgba(139, 92, 246, 0.2), 0 0 60px rgba(139, 92, 246, 0.1)' }}
-                  >
-                    0
-                  </motion.span>
-                  <motion.span
-                    initial={{ opacity: 0, y: 60 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.55, ease }}
-                    className="inline-block text-white"
-                    style={{ textShadow: '0 0 10px rgba(139, 92, 246, 0.4), 0 0 30px rgba(139, 92, 246, 0.2), 0 0 60px rgba(139, 92, 246, 0.1)' }}
-                  >
-                    1
-                  </motion.span>
-                </motion.h1>
-
-                {/* Title reflection */}
-                <div
-                  className="relative overflow-hidden h-6 md:h-10 select-none"
-                  aria-hidden="true"
-                  style={{
-                    transform: 'scaleY(-1)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, rgba(255,255,255,0.12), transparent 80%)',
-                    maskImage: 'linear-gradient(to bottom, rgba(255,255,255,0.12), transparent 80%)',
-                  }}
-                >
-                  <div
-                    className="font-display font-black tracking-tighter leading-[0.85] text-violet-400/30"
-                    style={{ fontSize: 'clamp(5rem, 12vw, 12rem)' }}
-                  >
-                    $401
-                  </div>
-                </div>
-
-                {/* Horizontal scan line across title */}
+      {/* ═══════════ SYSTEM READOUT (right) ═══════════ */}
+      <AnimatePresence>
+        {phase >= 3 && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="absolute top-16 right-8 md:right-28 z-20 font-mono text-right hidden md:block"
+          >
+            {SYSTEM_READOUT.map((item, i) => (
+              <motion.div
+                key={item.label}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: 0.3 + i * 0.08 }}
+                className="mb-2 flex items-center justify-end gap-3"
+              >
+                <span className="text-[7px] tracking-[0.25em] text-zinc-700">{item.label}</span>
+                <span className={`text-[9px] tracking-wider font-bold ${item.color}`}>{item.value}</span>
+              </motion.div>
+            ))}
+            {/* Miniature progress bar */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+              className="mt-4 flex items-center gap-2 justify-end"
+            >
+              <span className="text-[7px] tracking-[0.25em] text-zinc-700">SYNC</span>
+              <div className="w-20 h-[3px] bg-zinc-900 overflow-hidden">
                 <motion.div
-                  initial={{ scaleX: 0, originX: 0 }}
-                  animate={{ scaleX: [0, 1, 1, 0], originX: [0, 0, 1, 1] }}
-                  transition={{ duration: 1.2, delay: 0.6, ease: "easeInOut" }}
-                  className="absolute top-[60%] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                />
-
-                {/* Secondary thinner scan line */}
-                <motion.div
-                  initial={{ scaleX: 0, originX: 1 }}
-                  animate={{ scaleX: [0, 1, 1, 0], originX: [1, 1, 0, 0] }}
-                  transition={{ duration: 1, delay: 0.8, ease: "easeInOut" }}
-                  className="absolute top-[65%] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-violet-500/20 to-transparent"
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  transition={{ duration: 2, delay: 1.2, ease: 'easeOut' }}
+                  className="h-full bg-green-500/60"
                 />
               </div>
+              <span className="text-[7px] text-green-600 font-bold">100%</span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-              {/* Tagline */}
+      {/* ═══════════ FLOATING NODE LABELS ═══════════ */}
+      <AnimatePresence>
+        {phase >= 3 && (
+          <>
+            {NODE_LABELS.map((node) => (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.7 }}
-                className="mb-2"
+                key={node.label}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: node.delay }}
+                className="absolute z-[6] pointer-events-none flex items-center gap-1.5"
+                style={{ left: node.x, top: node.y }}
               >
-                <span className="text-zinc-400 text-xl md:text-2xl tracking-[0.3em] uppercase font-display font-black">
-                  PATH 401 &mdash; PROVE WHO YOU ARE
+                <span className="relative flex h-1 w-1">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500/40 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1 w-1 bg-green-500/60" />
                 </span>
+                <span className="text-[7px] font-mono text-zinc-700 tracking-[0.2em]">{node.label}</span>
               </motion.div>
+            ))}
+          </>
+        )}
+      </AnimatePresence>
 
-              {/* Description */}
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.9 }}
-                className="text-zinc-500 max-w-xl text-sm leading-relaxed mb-8 font-mono"
-              >
-                Before you can follow the money, you need to know who you are.
-                The <code className="text-violet-400 bg-zinc-900 px-1.5 py-0.5 border border-zinc-800">$401</code> standard
-                is your cryptographic identity &mdash; encrypted, self-sovereign, and inscribed on-chain forever.
-                Your peers decide what it&apos;s worth.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.1 }}
-                className="flex flex-wrap gap-4"
-              >
-                <a
-                  href="https://path402.com/identity"
-                  className="group relative inline-flex items-center gap-3 px-8 py-4 bg-violet-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-violet-700 transition-all overflow-hidden"
-                >
-                  Mint Your Identity
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-                </a>
-                <a
-                  href="https://bit-sign.online"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 px-8 py-4 border border-zinc-800 text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-zinc-600 hover:text-white transition-all"
-                >
-                  bit-sign.online &rarr;
-                </a>
-                <Link
-                  href="/spec"
-                  className="inline-flex items-center gap-3 px-8 py-4 border border-zinc-800 text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-violet-500/50 hover:text-violet-400 transition-all"
-                >
-                  Read the Spec &rarr;
-                </Link>
-              </motion.div>
-            </div>
-
-            {/* ═══ RIGHT: Identity panel ═══ */}
+      {/* ═══════════ MAIN CONTENT ═══════════ */}
+      <div className="relative z-20 px-6 md:px-16 max-w-[1920px] mx-auto w-full">
+        <AnimatePresence>
+          {phase >= 2 && (
             <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.8, ease }}
-              className="hidden lg:flex flex-col w-[400px] xl:w-[480px] flex-shrink-0 mt-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              className="flex flex-col lg:flex-row lg:items-stretch lg:gap-12"
             >
-              <div className="relative border border-zinc-800 overflow-hidden flex-1">
-                {/* Image */}
-                <img
-                  src="/third-way.png"
-                  alt="Three approaches to identity: surveillance, corporate, and peer-underwritten"
-                  className="absolute inset-0 w-full h-full object-cover opacity-50"
-                />
+              {/* ═══ LEFT: Title + CTA ═══ */}
+              <div className="flex-1 min-w-0">
+                {/* Super title */}
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1, ease }}
+                  className="flex items-center gap-3 mb-6"
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                  </span>
+                  <span className="text-zinc-600 text-[10px] tracking-[0.3em] uppercase font-mono font-bold">
+                    HTTP 402 : PAYMENT REQUIRED
+                  </span>
+                </motion.div>
 
-                {/* Overlay content */}
-                <div className="relative z-10 p-8 md:p-10 flex flex-col justify-between h-full bg-gradient-to-t from-black/90 via-black/50 to-black/70">
-                  {/* Corner brackets */}
-                  <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-violet-500/30" />
-                  <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-violet-500/30" />
-                  <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-violet-500/30" />
-                  <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-violet-500/30" />
+                {/* ═══ THE MASSIVE $402 TITLE ═══ */}
+                <div className="relative mb-0">
+                  <motion.h1
+                    className="font-display font-black tracking-tighter leading-[0.85] hero-title-glow"
+                    style={{ fontSize: 'clamp(5rem, 12vw, 12rem)' }}
+                  >
+                    <motion.span
+                      initial={{ opacity: 0, y: 60 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.8, delay: 0.2, ease }}
+                      className="inline-block text-white"
+                    >
+                      $
+                    </motion.span>
+                    <motion.span
+                      initial={{ opacity: 0, y: 60 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.8, delay: 0.35, ease }}
+                      className="inline-block text-white"
+                    >
+                      4
+                    </motion.span>
+                    <motion.span
+                      initial={{ opacity: 0, y: 60 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.8, delay: 0.45, ease }}
+                      className="inline-block text-white"
+                    >
+                      0
+                    </motion.span>
+                    <motion.span
+                      initial={{ opacity: 0, y: 60 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.8, delay: 0.55, ease }}
+                      className="inline-block text-white"
+                    >
+                      2
+                    </motion.span>
+                  </motion.h1>
 
-                  {/* Label */}
-                  <div className="text-[8px] text-zinc-600 font-mono tracking-[0.3em] uppercase mb-6">
-                    SYS::IDENTITY_MODEL
-                  </div>
-
-                  <div>
-                    <h2 className="text-2xl xl:text-3xl font-black tracking-tighter mb-5 font-display leading-tight text-white">
-                      THREE MODELS<span className="text-zinc-700">.</span><br />
-                      ONE SOLUTION<span className="text-zinc-700">.</span>
-                    </h2>
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-center gap-3">
-                        <span className="w-2 h-2 bg-red-500/80 shrink-0" />
-                        <span className="text-sm text-zinc-400"><span className="text-red-400 font-bold">Surveillance</span> &mdash; state watches you</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="w-2 h-2 bg-amber-500/80 shrink-0" />
-                        <span className="text-sm text-zinc-400"><span className="text-amber-400 font-bold">Corporate KYC</span> &mdash; they own your data</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="w-2 h-2 bg-violet-500/80 shrink-0" />
-                        <span className="text-sm text-zinc-400"><span className="text-violet-400 font-bold">Peer Underwriting</span> &mdash; you own yourself</span>
-                      </div>
+                  {/* Title reflection (mirror fading below) */}
+                  <div
+                    className="relative overflow-hidden h-6 md:h-10 select-none"
+                    aria-hidden="true"
+                    style={{
+                      transform: 'scaleY(-1)',
+                      WebkitMaskImage: 'linear-gradient(to bottom, rgba(255,255,255,0.12), transparent 80%)',
+                      maskImage: 'linear-gradient(to bottom, rgba(255,255,255,0.12), transparent 80%)',
+                    }}
+                  >
+                    <div
+                      className="font-display font-black tracking-tighter leading-[0.85] text-white/40"
+                      style={{ fontSize: 'clamp(5rem, 12vw, 12rem)' }}
+                    >
+                      $402
                     </div>
                   </div>
 
-                  {/* Bottom data strip */}
-                  <div className="mt-auto pt-4 flex items-center gap-4 text-[8px] font-mono text-zinc-700 tracking-wider">
-                    <span>PROTO::HTTP/401</span>
-                    <span className="w-1 h-1 bg-zinc-800" />
-                    <span>ID::PEER_STAKE</span>
-                    <span className="w-1 h-1 bg-zinc-800" />
-                    <span>ROOT::ON_CHAIN</span>
+                  {/* Horizontal scan line across title */}
+                  <motion.div
+                    initial={{ scaleX: 0, originX: 0 }}
+                    animate={{ scaleX: [0, 1, 1, 0], originX: [0, 0, 1, 1] }}
+                    transition={{ duration: 1.2, delay: 0.6, ease: "easeInOut" }}
+                    className="absolute top-[60%] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                  />
+
+                  {/* Secondary thinner scan line */}
+                  <motion.div
+                    initial={{ scaleX: 0, originX: 1 }}
+                    animate={{ scaleX: [0, 1, 1, 0], originX: [1, 1, 0, 0] }}
+                    transition={{ duration: 1, delay: 0.8, ease: "easeInOut" }}
+                    className="absolute top-[65%] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"
+                  />
+                </div>
+
+                {/* Tagline */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.7 }}
+                  className="mb-2"
+                >
+                  <span className="text-zinc-400 text-xl md:text-2xl tracking-[0.3em] uppercase font-display font-black">
+                    PATH 402 — FOLLOW THE MONEY
+                  </span>
+                </motion.div>
+
+                {/* Description */}
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.9 }}
+                  className="text-zinc-500 max-w-xl text-sm leading-relaxed mb-8 font-mono"
+                >
+                  Put a <code className="text-white bg-zinc-900 px-1.5 py-0.5 border border-zinc-800">$</code> in
+                  front of any path and it becomes a tokenized asset. Run a node, serve content, earn tokens.
+                  The network pays you for the infrastructure you provide.
+                </motion.p>
+
+                {/* CTA buttons */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1.1 }}
+                  className="flex flex-wrap gap-4"
+                >
+                  <Link
+                    href="/download"
+                    className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white text-black font-bold uppercase tracking-widest text-xs hover:bg-zinc-200 transition-all overflow-hidden"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download Client
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-green-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                  </Link>
+                  <Link
+                    href="/whitepaper"
+                    className="inline-flex items-center gap-3 px-8 py-4 border border-zinc-800 text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-zinc-600 hover:text-white transition-all"
+                  >
+                    Read Whitepaper
+                  </Link>
+                  <Link
+                    href="/exec-summary"
+                    className="inline-flex items-center gap-3 px-8 py-4 border border-zinc-800 text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-zinc-600 hover:text-white transition-all"
+                  >
+                    Exec Summary
+                  </Link>
+                </motion.div>
+              </div>
+
+              {/* ═══ RIGHT: Video panel ═══ */}
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.8, ease }}
+                className="hidden lg:flex flex-col w-[400px] xl:w-[480px] flex-shrink-0 mt-6"
+              >
+                <div className="relative border border-zinc-800 overflow-hidden flex-1 aspect-video">
+                  {/* Video background */}
+                  <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover opacity-40"
+                  >
+                    <source src="https://pub-fee9eb6b685a48f2aa263c104838ce5e.r2.dev/402-video-1.mp4" type="video/mp4" />
+                  </video>
+
+                  {/* Overlay content */}
+                  <div className="relative z-10 p-8 md:p-10 flex flex-col justify-center h-full bg-gradient-to-t from-black/80 via-black/40 to-black/60">
+                    {/* Corner brackets */}
+                    <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-zinc-600" />
+                    <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-zinc-600" />
+                    <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-zinc-600" />
+                    <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-zinc-600" />
+
+                    {/* Label */}
+                    <div className="text-[8px] text-zinc-600 font-mono tracking-[0.3em] uppercase mb-6">
+                      SYS::CORE_CONCEPT
+                    </div>
+
+                    <h2 className="text-2xl xl:text-3xl font-black tracking-tighter mb-5 font-display leading-tight">
+                      EVERY URL<span className="text-zinc-700">.</span><br />
+                      BECOMES AN<span className="text-zinc-700">.</span><br />
+                      ECONOMIC OBJECT<span className="text-zinc-700">.</span>
+                    </h2>
+                    <p className="text-zinc-500 text-sm leading-relaxed">
+                      Tokens gate access. Payment flows to holders and operators. The network rewards you for the infrastructure you provide.
+                    </p>
+
+                    {/* Bottom data strip */}
+                    <div className="mt-auto pt-6 flex items-center gap-4 text-[8px] font-mono text-zinc-700 tracking-wider">
+                      <span>PROTO::HTTP/402</span>
+                      <span className="w-1 h-1 bg-zinc-800" />
+                      <span>NET::GOSSIP_P2P</span>
+                      <span className="w-1 h-1 bg-zinc-800" />
+                      <span>ENC::NOISE_IK</span>
+                    </div>
                   </div>
                 </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ═══════════ DATA STREAMS (bottom) ═══════════ */}
+      <AnimatePresence>
+        {phase >= 3 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.5 }}
+            className="absolute bottom-20 left-0 right-0 z-10 overflow-hidden space-y-0.5"
+          >
+            <div className="overflow-hidden whitespace-nowrap">
+              <div className="inline-block animate-data-scroll-left text-[7px] font-mono text-zinc-800/40 tracking-[0.15em]">
+                {DATA_STREAM.repeat(4)}
               </div>
-            </motion.div>
-          </div>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
-      </section>
-
-      {/* ═══ PEER UNDERWRITING ═══ */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        className="border-b border-zinc-200 dark:border-zinc-900"
-      >
-        <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
-          <motion.div custom={0} variants={fadeIn} className="section-label">
-            The Third Way
+            </div>
+            <div className="overflow-hidden whitespace-nowrap">
+              <div className="inline-block animate-data-scroll-right text-[7px] font-mono text-zinc-800/40 tracking-[0.15em]">
+                {DATA_STREAM.repeat(4)}
+              </div>
+            </div>
+            <div className="overflow-hidden whitespace-nowrap">
+              <div className="inline-block animate-data-scroll-left text-[7px] font-mono text-zinc-800/40 tracking-[0.15em]" style={{ animationDuration: '35s' }}>
+                {DATA_STREAM.repeat(4)}
+              </div>
+            </div>
           </motion.div>
-          <div className="grid md:grid-cols-3 gap-0 border border-zinc-200 dark:border-zinc-800">
-            <motion.div custom={0.1} variants={fadeUp} className="p-8 md:p-10 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800">
-              <div className="text-[9px] text-red-500 font-mono uppercase tracking-[0.2em] mb-4">Old Way #1</div>
-              <p className="text-lg font-black tracking-tight mb-2">Anonymity</p>
-              <p className="text-zinc-500 text-sm">No accountability. Enables trolls, scammers, and sock puppets. The internet&apos;s original sin.</p>
-            </motion.div>
-            <motion.div custom={0.2} variants={fadeUp} className="p-8 md:p-10 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800">
-              <div className="text-[9px] text-amber-500 font-mono uppercase tracking-[0.2em] mb-4">Old Way #2</div>
-              <p className="text-lg font-black tracking-tight mb-2">Centralised KYC</p>
-              <p className="text-zinc-500 text-sm">Hand your documents to a corporation. They verify you. They own the relationship. They can revoke it.</p>
-            </motion.div>
-            <motion.div custom={0.3} variants={fadeUp} className="p-8 md:p-10">
-              <div className="text-[9px] text-violet-500 font-mono uppercase tracking-[0.2em] mb-4">$401 Way</div>
-              <p className="text-lg font-black tracking-tight mb-2">Peer Underwriting</p>
-              <p className="text-zinc-500 text-sm">You issue your identity. Your peers stake on it. The market decides what your reputation is worth. No central authority.</p>
-            </motion.div>
-          </div>
-        </div>
-      </motion.section>
+        )}
+      </AnimatePresence>
 
-      {/* ═══ FIND YOURSELF ═══ */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        className="border-b border-zinc-200 dark:border-zinc-900"
-      >
-        <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
-          <motion.div custom={0} variants={fadeIn} className="section-label">
-            Find Yourself
+      {/* ═══════════ SCROLL INDICATOR ═══════════ */}
+      <AnimatePresence>
+        {phase >= 3 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 1.5 }}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
+          >
+            <span className="text-zinc-700 text-[9px] uppercase tracking-[0.3em] font-mono">Scroll</span>
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="w-[1px] h-6 bg-gradient-to-b from-zinc-700 to-transparent"
+            />
           </motion.div>
-          <div className="grid md:grid-cols-2 gap-0 border border-zinc-200 dark:border-zinc-800">
-            <motion.div custom={0.1} variants={fadeUp} className="p-8 md:p-12 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800">
+        )}
+      </AnimatePresence>
+
+      {/* Bottom border glow */}
+      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
+    </section>
+  );
+}
+
+// ── Status Grid (post-hero) ─────────────────────────────────────
+
+function StatusGrid() {
+  return (
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      className="border-b border-zinc-200 dark:border-zinc-900"
+    >
+      <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
+        <motion.div custom={0} variants={fadeIn} className="section-label">
+          System Overview
+        </motion.div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black">
+          {[
+            { label: 'Protocol', value: 'HTTP 402', sub: 'Payment Required', accent: false },
+            { label: 'Token Standard', value: 'POW20', sub: 'BSV-20 via mining', accent: false },
+            { label: 'Transport', value: 'NOISE', sub: 'E2E encrypted P2P', accent: false },
+            { label: 'Status', value: 'LIVE', sub: 'Mainnet operational', accent: true },
+          ].map((metric, i) => (
+            <motion.div
+              key={metric.label}
+              custom={0.1 + i * 0.08}
+              variants={scaleIn}
+              className={`p-6 md:p-8 hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition-all ${
+                i < 3 ? 'border-r border-zinc-200 dark:border-zinc-800' : ''
+              }`}
+            >
+              <div className="text-[9px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">{metric.label}</div>
+              <div className={`text-2xl md:text-3xl font-black tracking-tighter font-display mb-1 ${
+                metric.accent ? 'text-green-500' : 'text-zinc-900 dark:text-white'
+              }`}>
+                {metric.value}
+              </div>
+              <div className="text-[9px] text-zinc-500 font-mono font-bold uppercase tracking-widest">{metric.sub}</div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+// ── Core Idea ───────────────────────────────────────────────────
+
+function CoreIdea() {
+  return (
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      className="border-b border-zinc-200 dark:border-zinc-900"
+    >
+      <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
+        <motion.div custom={0} variants={fadeIn} className="section-label">
+          The Core Idea
+        </motion.div>
+        <div className="grid md:grid-cols-2 gap-0 border border-zinc-200 dark:border-zinc-800">
+          {/* Left: video demo with overlay text */}
+          <motion.div custom={0.1} variants={fadeUp} className="relative border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 overflow-hidden min-h-[300px] md:min-h-[400px]">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover opacity-40 dark:opacity-30"
+            >
+              <source src="https://pub-fee9eb6b685a48f2aa263c104838ce5e.r2.dev/402-video-1.mp4" type="video/mp4" />
+            </video>
+            <div className="relative z-10 p-8 md:p-12 flex flex-col justify-center h-full">
               <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-6 font-display">
-                EXPRESS<span className="text-zinc-300 dark:text-zinc-800">.</span><br />
-                YOURSELF<span className="text-zinc-300 dark:text-zinc-800">.</span><br />
-                ON-CHAIN<span className="text-zinc-300 dark:text-zinc-800">.</span>
+                EVERY URL<span className="text-zinc-300 dark:text-zinc-800">.</span><br />
+                BECOMES AN<span className="text-zinc-300 dark:text-zinc-800">.</span><br />
+                ECONOMIC OBJECT<span className="text-zinc-300 dark:text-zinc-800">.</span>
               </h2>
               <p className="text-zinc-500 text-sm leading-relaxed max-w-md">
-                Your identity isn&apos;t a username on someone else&apos;s server. It&apos;s a cryptographic proof
-                that you exist, that you created, that you own. No platform can take it away.
-                No corporation controls it. It&apos;s yours.
+                Tokens gate access. Payment flows to holders and operators. The network rewards you for the infrastructure you provide.
               </p>
-            </motion.div>
-            <div className="flex flex-col">
-              <motion.div custom={0.2} variants={fadeUp} className="p-8 md:p-12 border-b border-zinc-200 dark:border-zinc-800 flex-1">
-                <div className="text-[9px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-4">$402 says</div>
-                <p className="text-xl font-black tracking-tight mb-2 text-zinc-400">&ldquo;Follow the money&rdquo;</p>
-                <p className="text-zinc-500 text-sm">Payment flows, content access, economic coordination. The money side of the protocol.</p>
-              </motion.div>
-              <motion.div custom={0.3} variants={fadeUp} className="p-8 md:p-12 flex-1">
-                <div className="text-[9px] text-violet-500 font-mono uppercase tracking-[0.2em] mb-4">$401 says</div>
-                <p className="text-xl font-black tracking-tight mb-2">&ldquo;Follow your own path&rdquo;</p>
-                <p className="text-zinc-500 text-sm">Identity, authorship, reputation, self-sovereignty. The human side of the protocol.</p>
-              </motion.div>
             </div>
+          </motion.div>
+          <div className="flex flex-col">
+            <motion.div custom={0.2} variants={fadeUp} className="p-8 md:p-12 border-b border-zinc-200 dark:border-zinc-800 flex-1">
+              <div className="text-[9px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-4">Run a node</div>
+              <p className="text-xl font-black tracking-tight mb-2">Serve content to peers</p>
+              <p className="text-zinc-500 text-sm">The path402d daemon indexes the blockchain, serves content via P2P gossip, and discovers peers automatically.</p>
+            </motion.div>
+            <motion.div custom={0.3} variants={fadeUp} className="p-8 md:p-12 flex-1">
+              <div className="text-[9px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-4">Earn $402</div>
+              <p className="text-xl font-black tracking-tight mb-2">Through Proof of Work</p>
+              <p className="text-zinc-500 text-sm">Early operators earn the most. The network needs you before it becomes useful. POW20 mining rewards real infrastructure.</p>
+            </motion.div>
           </div>
         </div>
-      </motion.section>
+      </div>
+    </motion.section>
+  );
+}
 
-      {/* ═══ HOW IT WORKS ═══ */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        className="border-b border-zinc-200 dark:border-zinc-900"
-      >
-        <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
-          <motion.div custom={0} variants={fadeIn} className="section-label">
-            How Identity Works
-          </motion.div>
-          <div className="border border-zinc-200 dark:border-zinc-800">
-            {[
-              {
-                step: '01',
-                title: 'Encrypt your documents',
-                desc: 'At bit-sign.online, encrypt your passport or ID into a sealed cryptographic bundle. Nobody can read it without your key.',
-                accent: false,
-              },
-              {
-                step: '02',
-                title: 'Inscribe the root',
-                desc: 'The encrypted bundle is written to the blockchain as your root inscription — a permanent, tamper-proof anchor for your identity.',
-                accent: false,
-              },
-              {
-                step: '03',
-                title: 'Mint your $401 token',
-                desc: 'Choose your symbol — $BOASE, $ALICE, $YOU — and mint your identity token. It traces back to your root inscription forever.',
-                accent: false,
-              },
-              {
-                step: '04',
-                title: 'Peers stake on you',
-                desc: 'Other $401 holders lock tokens against your identity. Their stake says "I vouch for this person." More stake = higher trust score.',
-                accent: false,
-              },
-              {
-                step: '05',
-                title: 'Pair with $402',
-                desc: 'Your $401 unlocks the full protocol. Earn dividends, operate nodes, write legally binding documents, commit code with attribution.',
-                accent: true,
-              },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                custom={0.1 + i * 0.08}
-                variants={slideRight}
-                className={`flex items-start gap-6 p-6 ${
-                  i < 4 ? 'border-b border-zinc-200 dark:border-zinc-800' : ''
-                } hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors`}
-              >
-                <span className={`w-10 h-10 flex items-center justify-center text-xs font-display font-bold shrink-0 ${
-                  item.accent ? 'bg-violet-500 text-white' : 'bg-zinc-100 dark:bg-zinc-900'
-                }`}>
-                  {item.step}
+// ── Payment Flow ────────────────────────────────────────────────
+
+function PaymentFlow() {
+  const steps = [
+    { step: '01', text: 'Client requests a $ path', code: 'GET /$video-1', color: 'text-zinc-500' },
+    { step: '02', text: 'Server returns 402 Challenge', code: 'HTTP/1.1 402 Payment Required\nx-bsv-payment-satoshis-required: 1000', color: 'text-zinc-500' },
+    { step: '03', text: 'Client sends Auth + Payment', code: 'x-bsv-auth-identity-key: <pubkey>\nx-bsv-payment: { transaction }', color: 'text-zinc-500' },
+    { step: '04', text: 'Server verifies via BRC-104/105', code: null, color: 'text-zinc-500' },
+    { step: '05', text: 'Access granted + Indexer Stamp', code: '200 OK', color: 'text-green-500' },
+  ];
+
+  return (
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      className="border-b border-zinc-200 dark:border-zinc-900"
+    >
+      <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
+        <motion.div custom={0} variants={fadeIn} className="section-label">
+          Payment Flow
+        </motion.div>
+        <div className="border border-zinc-200 dark:border-zinc-800">
+          {steps.map((item, i) => (
+            <motion.div
+              key={i}
+              custom={0.1 + i * 0.08}
+              variants={slideRight}
+              className={`flex items-start gap-6 p-6 ${
+                i < steps.length - 1 ? 'border-b border-zinc-200 dark:border-zinc-800' : ''
+              } hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors`}
+            >
+              <span className="w-10 h-10 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 text-xs font-display font-bold shrink-0">
+                {item.step}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold tracking-tight mb-1">{item.text}</p>
+                {item.code && (
+                  <pre className={`text-xs ${item.color} font-mono mt-1 whitespace-pre-wrap`}>{item.code}</pre>
+                )}
+              </div>
+              {i === steps.length - 1 && (
+                <span className="relative flex h-2 w-2 self-center">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
                 </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold tracking-tight mb-1">{item.title}</p>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+// ── Demo Video ──────────────────────────────────────────────────
+
+function DemoVideo() {
+  return (
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      className="border-b border-zinc-200 dark:border-zinc-900"
+    >
+      <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
+        <motion.div custom={0} variants={fadeIn} className="section-label">
+          See It In Action
+        </motion.div>
+        <motion.div
+          custom={0.1}
+          variants={scaleIn}
+          className="relative border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-black"
+        >
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls
+            className="w-full aspect-video"
+          >
+            <source src="https://pub-fee9eb6b685a48f2aa263c104838ce5e.r2.dev/402-video-2.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute top-4 left-4 z-10 pointer-events-none">
+            <span className="text-[8px] font-mono text-white/60 tracking-[0.2em] uppercase bg-black/50 px-2 py-1">
+              $402 Protocol Demo
+            </span>
+          </div>
+        </motion.div>
+      </div>
+    </motion.section>
+  );
+}
+
+// ── Examples ────────────────────────────────────────────────────
+
+function Examples() {
+  const examples = [
+    {
+      path: '$alice',
+      title: 'Video Content',
+      desc: 'Alice hosts a video. She mints 10,000 tokens.',
+      detail: '1 token = 1 view. Token returns to Alice after use. She resells it.',
+    },
+    {
+      path: '$bob/$chatroom',
+      title: 'Chat Access',
+      desc: 'Bob runs a chatroom. He mints 100 tokens.',
+      detail: '1 token = 1 hour access. Max 100 concurrent users. Price floats with demand.',
+    },
+    {
+      path: '$fnews.online',
+      title: 'Content Factory',
+      desc: 'F.NEWS tokenizes satirical content.',
+      detail: 'AI-generated videos served P2P. Speculators fund production. Content pays for itself.',
+      link: 'https://fnews.online',
+    },
+  ];
+
+  return (
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      className="border-b border-zinc-200 dark:border-zinc-900"
+    >
+      <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
+        <motion.div custom={0} variants={fadeIn} className="section-label">
+          Examples
+        </motion.div>
+        <div className="grid md:grid-cols-3 gap-0 border border-zinc-200 dark:border-zinc-800">
+          {examples.map((ex, i) => (
+            <motion.div
+              key={ex.path}
+              custom={0.1 + i * 0.1}
+              variants={scaleIn}
+              className={`p-8 ${i < 2 ? 'border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800' : ''} hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors`}
+            >
+              <code className="text-blue-600 dark:text-blue-400 font-mono text-lg font-bold block mb-4">{ex.path}</code>
+              <h3 className="text-sm font-black uppercase tracking-wider mb-3">{ex.title}</h3>
+              <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-2">{ex.desc}</p>
+              <p className="text-zinc-500 text-xs">{ex.detail}</p>
+              {ex.link && (
+                <a href={ex.link} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                  Visit &rarr;
+                </a>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+// ── Two Token Model ─────────────────────────────────────────────
+
+function TokenModel() {
+  return (
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      className="border-b border-zinc-200 dark:border-zinc-900"
+    >
+      <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
+        <motion.div custom={0} variants={fadeIn} className="section-label">
+          Two Token Model
+        </motion.div>
+        <div className="grid md:grid-cols-2 gap-0 border border-zinc-200 dark:border-zinc-800">
+          <motion.div custom={0.1} variants={fadeUp} className="p-8 md:p-10 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800">
+            <h3 className="text-lg font-display font-black tracking-tight mb-6 uppercase">
+              $402<span className="text-zinc-300 dark:text-zinc-700"> Protocol</span>
+            </h3>
+            <div className="space-y-4">
+              {[
+                ['Earned', 'By running a node and serving the network'],
+                ['Standard', 'BSV-20 via POW20 mining (BRC-100)'],
+                ['Utility', 'Protocol fees, staking, governance'],
+                ['Distribution', 'Fair \u2014 operators earn, not speculators'],
+              ].map(([label, desc]) => (
+                <div key={label} className="flex gap-4">
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-zinc-500 w-24 shrink-0 pt-0.5">{label}</span>
+                  <span className="text-sm text-zinc-600 dark:text-zinc-400">{desc}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+          <motion.div custom={0.2} variants={fadeUp} className="p-8 md:p-10">
+            <h3 className="text-lg font-display font-black tracking-tight mb-6 uppercase">
+              $PATH<span className="text-zinc-300 dark:text-zinc-700"> Tokens</span>
+            </h3>
+            <div className="space-y-4">
+              {[
+                ['Minted', 'By anyone, for any URL path'],
+                ['Pricing', 'sqrt_decay curve (early buyers win)'],
+                ['1 Token', '1 second of access (reusable)'],
+                ['Hierarchy', 'Parent tokens grant child path access'],
+              ].map(([label, desc]) => (
+                <div key={label} className="flex gap-4">
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-zinc-500 w-24 shrink-0 pt-0.5">{label}</span>
+                  <span className="text-sm text-zinc-600 dark:text-zinc-400">{desc}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+// ── Quick Start ─────────────────────────────────────────────────
+
+function QuickStart() {
+  return (
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      className="border-b border-zinc-200 dark:border-zinc-900"
+    >
+      <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
+        <motion.div custom={0} variants={fadeIn} className="section-label">
+          Quick Start
+        </motion.div>
+        <div className="border border-zinc-200 dark:border-zinc-800">
+          <motion.div custom={0.1} variants={fadeUp} className="p-8 md:p-10 border-b border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-baseline gap-4 mb-4">
+              <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-zinc-500">01</span>
+              <h3 className="text-sm font-black uppercase tracking-wider">Install</h3>
+            </div>
+            <pre className="bg-zinc-50 dark:bg-zinc-950 p-4 font-mono text-sm text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 overflow-x-auto">
+              npm install -g path402
+            </pre>
+          </motion.div>
+          <motion.div custom={0.2} variants={fadeUp} className="p-8 md:p-10 border-b border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-baseline gap-4 mb-4">
+              <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-zinc-500">02</span>
+              <h3 className="text-sm font-black uppercase tracking-wider">Run the Daemon</h3>
+            </div>
+            <pre className="bg-zinc-50 dark:bg-zinc-950 p-4 font-mono text-sm text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 overflow-x-auto">
+              path402d start
+            </pre>
+          </motion.div>
+          <motion.div custom={0.3} variants={fadeUp} className="p-8 md:p-10">
+            <div className="flex items-baseline gap-4 mb-4">
+              <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-zinc-500">03</span>
+              <h3 className="text-sm font-black uppercase tracking-wider">Add to Claude Desktop</h3>
+            </div>
+            <pre className="bg-zinc-50 dark:bg-zinc-950 p-4 font-mono text-sm text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 overflow-x-auto">
+{`{
+  "mcpServers": {
+    "path402": {
+      "command": "npx",
+      "args": ["path402"]
+    }
+  }
+}`}
+            </pre>
+          </motion.div>
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+// ── Roadmap ─────────────────────────────────────────────────────
+
+function Roadmap() {
+  const phases = [
+    { phase: '1', title: 'Discovery UI', status: 'complete', desc: 'Token marketplace, video previews, metadata display' },
+    { phase: '2', title: 'P2P Content Network', status: 'complete', desc: 'libp2p gossip, content storage, NOISE encrypted transport' },
+    { phase: '3', title: 'POW20 Token Mining', status: 'active', desc: 'Earn $402 by running nodes and serving content to peers' },
+    { phase: '4', title: 'Agentic Content Generation', status: 'upcoming', desc: 'AI-generated content on demand, funded by token speculation' },
+    { phase: '5', title: 'Content Flywheel', status: 'upcoming', desc: 'Revenue recycling, auto-funded production, speculative consensus' },
+  ];
+
+  return (
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      className="border-b border-zinc-200 dark:border-zinc-900"
+    >
+      <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
+        <motion.div custom={0} variants={fadeIn} className="section-label">
+          Roadmap
+        </motion.div>
+        <div className="border border-zinc-200 dark:border-zinc-800">
+          {phases.map((item, i) => (
+            <motion.div
+              key={i}
+              custom={0.1 + i * 0.08}
+              variants={slideRight}
+              className={`flex items-start gap-6 p-6 ${
+                i < phases.length - 1 ? 'border-b border-zinc-200 dark:border-zinc-800' : ''
+              } ${item.status === 'active' ? 'bg-zinc-50 dark:bg-zinc-900/20' : ''} hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors`}
+            >
+              <span className={`w-10 h-10 flex items-center justify-center text-xs font-display font-bold shrink-0 ${
+                item.status === 'complete'
+                  ? 'bg-zinc-900 dark:bg-white text-white dark:text-black'
+                  : item.status === 'active'
+                  ? 'bg-green-500 text-black'
+                  : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'
+              }`}>
+                {item.phase}
+              </span>
+              <div className="flex-1">
+                <div className="flex items-center gap-3">
+                  <p className="text-sm font-black tracking-tight">{item.title}</p>
+                  <span className={`text-[8px] font-mono font-bold uppercase px-1.5 py-0.5 border ${
+                    item.status === 'complete' ? 'text-zinc-500 border-zinc-300 dark:border-zinc-700' :
+                    item.status === 'active' ? 'text-green-500 border-green-500/30' :
+                    'text-zinc-400 dark:text-zinc-600 border-zinc-200 dark:border-zinc-800'
+                  }`}>
+                    {item.status}
+                  </span>
+                </div>
+                <p className="text-zinc-500 text-sm mt-1">{item.desc}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        <motion.p custom={0.6} variants={fadeIn} className="text-zinc-500 text-xs mt-4 font-mono">
+          See the content flywheel in action at{' '}
+          <a href="https://fnews.online" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">fnews.online</a>
+        </motion.p>
+      </div>
+    </motion.section>
+  );
+}
+
+// ── Ecosystem ───────────────────────────────────────────────────
+
+function Ecosystem() {
+  const links = [
+    { href: '/download', title: 'Desktop Client', desc: 'Download the $402 daemon for Mac, Windows, Linux', tag: 'download', external: false },
+    { href: 'https://www.npmjs.com/package/path402', title: 'path402', desc: 'MCP server + daemon + CLI in one package', tag: 'npm', external: true },
+    { href: 'https://github.com/b0ase/path402', title: 'GitHub', desc: 'Source code, issues, and contributions', tag: 'github', external: true },
+    { href: '/token', title: 'POW20 Token', desc: 'Earn $402 tokens by running the network', tag: 'token', external: false },
+    { href: '/protocol', title: 'Protocol Economics', desc: 'Staking, dividends, hierarchical ownership', tag: 'advanced', external: false },
+    { href: '/docs', title: 'Documentation', desc: 'Protocol spec, API reference, guides', tag: 'docs', external: false },
+    { href: 'https://fnews.online', title: 'F.NEWS', desc: 'The adversarial satire factory \u2014 $402 in action', tag: 'demo', external: true },
+  ];
+
+  return (
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      className="border-b border-zinc-200 dark:border-zinc-900"
+    >
+      <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
+        <motion.div custom={0} variants={fadeIn} className="section-label">
+          Ecosystem
+        </motion.div>
+        <div className="border border-zinc-200 dark:border-zinc-800">
+          {links.map((item, i) => {
+            const inner = (
+              <div className="flex items-center justify-between p-6 hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors">
+                <div>
+                  <h3 className="text-sm font-bold tracking-tight mb-1">{item.title}</h3>
                   <p className="text-zinc-500 text-sm">{item.desc}</p>
                 </div>
-                {item.accent && (
-                  <span className="relative flex h-2 w-2 self-center">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-500 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500" />
-                  </span>
+                <span className="text-zinc-400 dark:text-zinc-600 font-mono text-[9px] uppercase tracking-widest shrink-0 ml-4">
+                  {item.tag}
+                </span>
+              </div>
+            );
+
+            return (
+              <motion.div
+                key={i}
+                custom={0.05 + i * 0.05}
+                variants={slideRight}
+                className={i < links.length - 1 ? 'border-b border-zinc-200 dark:border-zinc-800' : ''}
+              >
+                {item.external ? (
+                  <a href={item.href} target="_blank" rel="noopener noreferrer">{inner}</a>
+                ) : (
+                  <Link href={item.href}>{inner}</Link>
                 )}
               </motion.div>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      </motion.section>
+      </div>
+    </motion.section>
+  );
+}
 
-      {/* ═══ THE PAIR ═══ */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        className="border-b border-zinc-200 dark:border-zinc-900"
-      >
-        <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
-          <motion.div custom={0} variants={fadeIn} className="section-label">
-            The $401 / $402 Pair
-          </motion.div>
-          <div className="grid md:grid-cols-2 gap-0 border border-zinc-200 dark:border-zinc-800">
-            <motion.div custom={0.1} variants={fadeUp} className="p-8 md:p-10 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800">
-              <h3 className="text-lg font-display font-black tracking-tight mb-6 uppercase">
-                $401<span className="text-violet-300 dark:text-violet-800"> Identity</span>
-              </h3>
-              <div className="space-y-4">
-                {[
-                  ['Purpose', 'Prove who you are, cryptographically'],
-                  ['Root', 'Encrypted passport inscription on-chain'],
-                  ['Symbol', 'Your name — $BOASE, $ALICE, $YOU'],
-                  ['Staking', 'Peers lock tokens to vouch for you'],
-                  ['Unlocks', 'Dividends, node ops, legal docs, code attribution'],
-                ].map(([label, desc]) => (
-                  <div key={label} className="flex gap-4">
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-zinc-500 w-24 shrink-0 pt-0.5">{label}</span>
-                    <span className="text-sm text-zinc-600 dark:text-zinc-400">{desc}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-            <motion.div custom={0.2} variants={fadeUp} className="p-8 md:p-10">
-              <h3 className="text-lg font-display font-black tracking-tight mb-6 uppercase">
-                $402<span className="text-zinc-300 dark:text-zinc-700"> Payment</span>
-              </h3>
-              <div className="space-y-4">
-                {[
-                  ['Purpose', 'Pay for content, earn from serving'],
-                  ['Standard', 'BSV-21 via POW20 mining'],
-                  ['Utility', 'Content access, staking, protocol fees'],
-                  ['Economics', 'Proof of indexing rewards'],
-                  ['Unlocks', 'Browsing, speculation, content distribution'],
-                ].map(([label, desc]) => (
-                  <div key={label} className="flex gap-4">
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-zinc-500 w-24 shrink-0 pt-0.5">{label}</span>
-                    <span className="text-sm text-zinc-600 dark:text-zinc-400">{desc}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-          <motion.p custom={0.3} variants={fadeIn} className="text-zinc-500 text-xs mt-4 font-mono">
-            Anonymous by default. Identity when you choose it. The $401 is never required for basic browsing &mdash; only for building, earning, and owning.
-          </motion.p>
-        </div>
-      </motion.section>
+// ── Final CTA ───────────────────────────────────────────────────
 
-      {/* ═══ WHAT $401 UNLOCKS ═══ */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        className="border-b border-zinc-200 dark:border-zinc-900"
-      >
-        <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
-          <motion.div custom={0} variants={fadeIn} className="section-label">
-            What Identity Unlocks
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-zinc-200 dark:border-zinc-800">
-            {[
-              {
-                icon: '\u270D',
-                title: 'Bitcoin Writer',
-                desc: 'Write documents to the blockchain with verified authorship. Wills, contracts, blog posts — all legally anchored to your identity.',
-                tag: '$bWriter',
-              },
-              {
-                icon: '\u2318',
-                title: 'Bitcoin Code',
-                desc: 'Commit code on-chain with attribution. Every line you write is tracked, credited, and potentially compensated.',
-                tag: '$bCode',
-              },
-              {
-                icon: '\u26A1',
-                title: 'Node Operations',
-                desc: 'Run a path402d node with a verified identity. Other nodes trust you. The network rewards you. Indexing becomes income.',
-                tag: 'path402d',
-              },
-              {
-                icon: '\u2194',
-                title: 'Dividends & Staking',
-                desc: 'Stake $402 tokens and receive dividends. KYC is required for financial returns — your $401 satisfies it automatically.',
-                tag: 'economics',
-              },
-              {
-                icon: '\uD83C\uDFAD',
-                title: 'Reputation',
-                desc: 'Your identity accumulates history. Every document written, every commit made, every node uptime — all provably yours.',
-                tag: 'trust',
-              },
-              {
-                icon: '\uD83D\uDD12',
-                title: 'Self-Sovereignty',
-                desc: 'No platform owns your identity. No company can delete it. Your encrypted passport bundle is yours, forever, on-chain.',
-                tag: 'ownership',
-              },
-            ].map((item, i) => (
-              <motion.div
-                key={item.title}
-                custom={0.1 + i * 0.08}
-                variants={scaleIn}
-                className={`p-8 hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors ${
-                  i % 3 !== 2 ? 'md:border-r border-zinc-200 dark:border-zinc-800' : ''
-                } ${i < 3 ? 'border-b border-zinc-200 dark:border-zinc-800' : ''}`}
-              >
-                <div className="text-2xl mb-3 opacity-60">{item.icon}</div>
-                <h3 className="text-sm font-black uppercase tracking-wider mb-2">{item.title}</h3>
-                <p className="text-zinc-500 text-sm mb-3">{item.desc}</p>
-                <span className="text-[8px] font-mono text-violet-500 uppercase tracking-widest">{item.tag}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.section>
-
-      {/* ═══ ACCESS SPECTRUM ═══ */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        className="border-b border-zinc-200 dark:border-zinc-900"
-      >
-        <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
-          <motion.div custom={0} variants={fadeIn} className="section-label">
-            Access Spectrum
-          </motion.div>
-          <div className="border border-zinc-200 dark:border-zinc-800 overflow-x-auto">
-            <table className="w-full text-sm font-mono">
-              <thead>
-                <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
-                  <th className="text-left p-4 text-[9px] font-bold uppercase tracking-widest text-zinc-500">Activity</th>
-                  <th className="text-center p-4 text-[9px] font-bold uppercase tracking-widest text-violet-500">$401</th>
-                  <th className="text-center p-4 text-[9px] font-bold uppercase tracking-widest text-zinc-500">$402</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ['Browse paywalled content', '\u2013', '\u2713'],
-                  ['Speculate on content tokens', '\u2013', '\u2713'],
-                  ['Sell tokens to peers', '\u2013', '\u2713'],
-                  ['Earn serving rewards', 'Optional', '\u2713'],
-                  ['Stake for dividends', '\u2713', '\u2713'],
-                  ['Write to chain (Bitcoin Writer)', '\u2713', '\u2713'],
-                  ['Commit code (Bitcoin Code)', '\u2713', '\u2713'],
-                  ['Mint new content tokens', '\u2713', '\u2713'],
-                  ['Operate a path402d node', '\u2713', '\u2713'],
-                ].map(([activity, needs401, needs402], i) => (
-                  <tr
-                    key={activity}
-                    className={`${i < 8 ? 'border-b border-zinc-200 dark:border-zinc-800' : ''} hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors`}
-                  >
-                    <td className="p-4 text-sm">{activity}</td>
-                    <td className={`p-4 text-center text-sm ${needs401 === '\u2713' ? 'text-violet-500 font-bold' : needs401 === 'Optional' ? 'text-amber-500' : 'text-zinc-400'}`}>
-                      {needs401}
-                    </td>
-                    <td className={`p-4 text-center text-sm ${needs402 === '\u2713' ? 'text-green-500 font-bold' : 'text-zinc-400'}`}>
-                      {needs402}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <motion.p custom={0.3} variants={fadeIn} className="text-zinc-500 text-xs mt-4 font-mono">
-            Anonymous by default. The protocol doesn&apos;t require identity until you want to build, earn, or own.
-          </motion.p>
-        </div>
-      </motion.section>
-
-      {/* ═══ TRUST SCORE ═══ */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        className="border-b border-zinc-200 dark:border-zinc-900"
-      >
-        <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
-          <motion.div custom={0} variants={fadeIn} className="section-label">
-            Trust Score
-          </motion.div>
-          <div className="border border-zinc-200 dark:border-zinc-800">
-            <motion.div custom={0.05} variants={fadeIn} className="border-b border-zinc-200 dark:border-zinc-800 overflow-hidden">
-              <img
-                src="/trust-score.png"
-                alt="Four trust levels from self-declared to institutionally verified"
-                className="w-full h-auto max-h-64 object-contain mx-auto opacity-80 dark:opacity-60 py-6"
-              />
-            </motion.div>
-            <motion.div custom={0.1} variants={fadeUp} className="p-8 md:p-12">
-              <h2 className="text-2xl md:text-3xl font-black tracking-tighter mb-6 font-display">
-                NOT A SOCIAL CREDIT SCORE<span className="text-violet-500">.</span>
-              </h2>
-              <p className="text-zinc-500 text-sm leading-relaxed max-w-2xl mb-8">
-                Your trust score isn&apos;t controlled by any authority. It&apos;s the sum of what your peers are willing to risk on your reputation.
-                Stakers lock real value against your identity. If you misbehave, they lose money. That&apos;s the incentive alignment.
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border border-zinc-200 dark:border-zinc-800">
-                {[
-                  { level: '0', label: 'Self-Declared', desc: 'Token minted, no external validation', color: 'text-zinc-500' },
-                  { level: '1', label: 'Peer-Vouched', desc: 'At least one staker backing you', color: 'text-amber-500' },
-                  { level: '2', label: 'Community-Trusted', desc: 'Multiple stakers, sustained uptime', color: 'text-violet-500' },
-                  { level: '3', label: 'Institutionally-Verified', desc: 'Professional attestation on-chain', color: 'text-green-500' },
-                ].map((item, i) => (
-                  <motion.div
-                    key={item.level}
-                    custom={0.2 + i * 0.08}
-                    variants={scaleIn}
-                    className={`p-6 ${i < 3 ? 'border-r border-zinc-200 dark:border-zinc-800' : ''}`}
-                  >
-                    <div className={`text-3xl font-display font-black mb-2 ${item.color}`}>{item.level}</div>
-                    <p className="text-xs font-bold uppercase tracking-wider mb-1">{item.label}</p>
-                    <p className="text-zinc-500 text-xs">{item.desc}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* ═══ CTA ═══ */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        className="py-24"
-      >
-        <div className="max-w-[1920px] mx-auto px-6 md:px-16 text-center">
-          <motion.h2
-            custom={0.1}
-            variants={fadeUp}
-            className="text-3xl md:text-5xl font-display font-black tracking-tighter mb-6"
+function FinalCTA() {
+  return (
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      className="py-24"
+    >
+      <div className="max-w-[1920px] mx-auto px-6 md:px-16 text-center">
+        <motion.h2
+          custom={0.1}
+          variants={fadeUp}
+          className="text-3xl md:text-5xl font-display font-black tracking-tighter mb-6"
+        >
+          THE NETWORK NEEDS<br />
+          <span className="text-zinc-300 dark:text-zinc-700">OPERATORS</span>
+        </motion.h2>
+        <motion.p
+          custom={0.2}
+          variants={fadeIn}
+          className="text-zinc-500 mb-10 text-sm font-mono"
+        >
+          Download the client. Run a node. Earn $402.
+        </motion.p>
+        <motion.div custom={0.3} variants={fadeUp} className="flex flex-wrap justify-center gap-4">
+          <Link
+            href="/download"
+            className="inline-flex items-center gap-3 px-10 py-5 bg-zinc-900 dark:bg-white text-white dark:text-black font-bold uppercase tracking-widest text-xs hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors"
           >
-            YOUR PERSONAL<br />
-            <span className="text-violet-500">IDENTITY PATH</span>
-          </motion.h2>
-          <motion.p
-            custom={0.2}
-            variants={fadeIn}
-            className="text-zinc-500 mb-10 text-sm font-mono"
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download Client
+          </Link>
+          <Link
+            href="/protocol"
+            className="inline-flex items-center gap-2 px-10 py-5 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-zinc-900 dark:hover:text-white transition-colors"
           >
-            Mint your identity. Own your name. Build on the protocol.
-          </motion.p>
-          <motion.div custom={0.3} variants={fadeUp} className="flex flex-wrap justify-center gap-4">
-            <a
-              href="https://path402.com/identity"
-              className="inline-flex items-center gap-3 px-10 py-5 bg-violet-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-violet-700 transition-colors"
-            >
-              Mint $401 Identity
-            </a>
+            Protocol Economics &rarr;
+          </Link>
+        </motion.div>
+      </div>
+    </motion.section>
+  );
+}
+
+// ── Dashboard Panel (Connected State) ───────────────────────────
+
+function DashboardPanel() {
+  const { wallet } = useWallet();
+  const [identitySymbol, setIdentitySymbol] = useState<string | null>(null);
+  const [holding, setHolding] = useState<{ balance: number; stakedBalance: number; pendingDividends: number } | null>(null);
+  const [libraryCount, setLibraryCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const headers: Record<string, string> = {};
+    if (wallet.handle) headers['x-wallet-handle'] = wallet.handle;
+    if (wallet.provider) headers['x-wallet-provider'] = wallet.provider;
+
+    Promise.all([
+      fetch('/api/client/identity').then(r => r.json()).catch(() => ({})),
+      fetch('/api/token/holding').then(r => r.ok ? r.json() : null).catch(() => null),
+      wallet.handle
+        ? fetch('/api/tokens/holdings', { headers }).then(r => r.ok ? r.json() : null).catch(() => null)
+        : Promise.resolve(null),
+    ]).then(([identityData, holdingData, holdingsData]) => {
+      if (identityData?.identity) setIdentitySymbol(identityData.identity.symbol);
+      if (holdingData) setHolding(holdingData);
+      if (holdingsData?.holdings) setLibraryCount(holdingsData.holdings.length);
+    }).finally(() => setLoading(false));
+  }, [wallet.handle, wallet.provider]);
+
+  const displayName = wallet.handle ? `@${wallet.handle}` : wallet.address ? `${wallet.address.slice(0, 8)}...` : 'Connected';
+  const formatNumber = (n: number | undefined | null) => (n ?? 0).toLocaleString();
+
+  return (
+    <main className="w-full px-6 md:px-16 py-8 max-w-[1920px] mx-auto">
+      {/* PageHeader style */}
+      <header className="mb-8 border-b border-zinc-200 dark:border-zinc-900 pb-6">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease }}
+          className="flex items-center gap-3 mb-4 text-zinc-500 text-xs tracking-widest uppercase"
+        >
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+          </span>
+          Web Client Online
+        </motion.div>
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2, ease }}
+          className="text-4xl md:text-6xl font-black tracking-tighter mb-2 font-display"
+        >
+          $402_CLIENT
+        </motion.h1>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="text-zinc-500"
+        >
+          Welcome, <span className="text-zinc-900 dark:text-white font-bold">{displayName}</span>
+        </motion.div>
+      </header>
+
+      {/* Status Bar */}
+      <section className="mb-8">
+        <div className="flex flex-wrap gap-3">
+          <div className={`inline-flex items-center gap-2 px-3 py-1.5 border text-[10px] font-mono uppercase tracking-widest ${
+            identitySymbol
+              ? 'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400'
+              : 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400'
+          }`}>
+            <span className={`w-1.5 h-1.5 ${identitySymbol ? 'bg-green-500' : 'bg-amber-500'}`} />
+            401 Identity: {loading ? '...' : identitySymbol || 'NOT MINTED'}
+          </div>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-mono uppercase tracking-widest">
+            <span className="w-1.5 h-1.5 bg-green-500" />
+            402 Payment: {displayName} via {wallet.provider}
+          </div>
+        </div>
+      </section>
+
+      {/* Metrics */}
+      <section className="mb-8">
+        <div className="section-label">Live Metrics</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border border-zinc-200 dark:border-zinc-800">
+          {[
+            { label: '$PATH402', value: formatNumber(holding?.balance), color: '' },
+            { label: 'Staked', value: formatNumber(holding?.stakedBalance), color: 'text-purple-600 dark:text-purple-400' },
+            { label: 'Dividends', value: formatNumber(holding?.pendingDividends), color: 'text-green-600 dark:text-green-400' },
+            { label: 'Library', value: String(libraryCount), color: '' },
+          ].map((m, i) => (
+            <div key={m.label} className={`p-6 ${i < 3 ? 'border-r border-zinc-200 dark:border-zinc-800' : ''}`}>
+              <div className="text-[9px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">{m.label}</div>
+              {loading ? (
+                <div className="text-sm text-zinc-400 font-mono animate-pulse">...</div>
+              ) : (
+                <div className={`text-2xl font-black tracking-tighter ${m.color || 'text-zinc-900 dark:text-white'}`}>{m.value}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Action Cards */}
+      <section>
+        <div className="section-label">Quick Actions</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border border-zinc-200 dark:border-zinc-800">
+          {[
+            { href: '/identity', label: '401 // Identity', value: identitySymbol || 'Mint DNA', icon: loading },
+            { href: '/wallet', label: '402 // Wallet', value: wallet.provider || 'Connect', icon: false },
+            { href: '/library', label: '200 // Library', value: 'Content', icon: false },
+            { href: '/settings', label: '200 // Settings', value: 'Configure', icon: false },
+            { href: '/token', label: 'POW20', value: 'Token', icon: false },
+            { href: '/docs', label: 'Documentation', value: 'Docs', icon: false },
+            { href: '/whitepaper', label: 'Protocol Spec', value: 'Whitepaper', icon: false },
+            { href: '/market', label: 'Marketplace', value: 'Market', icon: false },
+          ].map((card, i) => (
             <Link
-              href="/spec"
-              className="inline-flex items-center gap-2 px-10 py-5 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-violet-500/50 hover:text-violet-400 transition-colors"
+              key={card.href}
+              href={card.href}
+              className={`block p-5 hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors ${
+                i % 4 !== 3 ? 'border-r border-zinc-200 dark:border-zinc-800' : ''
+              } ${i < 4 ? 'border-b border-zinc-200 dark:border-zinc-800' : ''}`}
             >
-              Read the Spec &rarr;
+              <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2">{card.label}</div>
+              {card.icon ? (
+                <div className="text-sm text-zinc-400 font-mono animate-pulse">...</div>
+              ) : (
+                <div className="text-sm font-bold tracking-tight capitalize">{card.value} &rarr;</div>
+              )}
             </Link>
-            <a
-              href="https://path402.com"
-              className="inline-flex items-center gap-2 px-10 py-5 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-zinc-900 dark:hover:text-white transition-colors"
-            >
-              $402 Protocol &rarr;
-            </a>
-          </motion.div>
+          ))}
         </div>
-      </motion.section>
+      </section>
+    </main>
+  );
+}
+
+// ── Main Export ──────────────────────────────────────────────────
+
+export default function Home() {
+  const { wallet } = useWallet();
+
+  if (wallet.connected) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-white pt-14">
+        <DashboardPanel />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-white">
+      {SITE_VARIANT === '401' ? <Hero401 /> : SITE_VARIANT === '403' ? <Hero403 /> : <BootSequenceHero />}
+      <div className="pt-0">
+        <StatusGrid />
+        <CoreIdea />
+        <PaymentFlow />
+        <DemoVideo />
+        <Examples />
+        <TokenModel />
+        <QuickStart />
+        <Roadmap />
+        <Ecosystem />
+        <FinalCTA />
+      </div>
     </div>
   );
 }
