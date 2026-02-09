@@ -17,7 +17,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.rewrite(new URL('/403', request.url));
   }
 
-  return NextResponse.next();
+  // Default to 401 for this project (path401-com)
+  return NextResponse.rewrite(new URL('/401', request.url));
 }
 
 export const config = {

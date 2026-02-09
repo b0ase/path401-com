@@ -26,36 +26,30 @@ const orbitron = Orbitron({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://path402.com'),
-  title: "$402 — Access Tokens for the Open Web",
-  description: "Mint an access token for anything addressable: your attention, your API, your content. The protocol for AI-native micropayments on BSV.",
-  keywords: ["$402", "path protocol", "BSV", "micropayments", "AI payments", "tokenization", "HTTP 402", "MCP", "AI agents", "attention economy"],
+  metadataBase: new URL('https://path401.com'),
+  title: "$401 — Follow Your Own Path",
+  description: "Decentralised identity protocol. Prove who you are without giving yourself away. Encrypted, self-sovereign, inscribed on-chain forever.",
+  keywords: ["$401", "path protocol", "BSV", "identity", "self-sovereign", "cryptographic identity", "HTTP 401", "on-chain identity", "peer underwriting"],
   authors: [{ name: "b0ase", url: "https://x.com/b0ase" }],
   creator: "b0ase",
   openGraph: {
-    title: "$402 — Access Tokens for the Open Web",
-    description: "Mint an access token for anything addressable: your attention, your API, your content.",
-    url: "https://path402.com",
-    siteName: "$402 Protocol",
+    title: "$401 — Follow Your Own Path",
+    description: "Decentralised identity protocol. Prove who you are without giving yourself away.",
+    url: "https://path401.com",
+    siteName: "$401 Protocol",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "$402 — Access Tokens for the Open Web",
-    description: "Mint an access token for anything addressable.",
+    title: "$401 — Follow Your Own Path",
+    description: "Decentralised identity protocol. Prove who you are without giving yourself away.",
     creator: "@b0ase",
     site: "@b0ase",
   },
   robots: {
     index: true,
     follow: true,
-  },
-  other: {
-    "ai-content-declaration": "This website provides tokenised content services for AI agents via MCP",
-    "ai-integration": "MCP server available via npm: path402",
-    "ai-plugin": "https://path402.com/.well-known/ai-plugin.json",
-    "llms-txt": "https://path402.com/llms.txt",
   },
 };
 
@@ -67,8 +61,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="ai-plugin" href="https://path402.com/.well-known/ai-plugin.json" />
-        <link rel="alternate" type="text/plain" href="https://path402.com/llms.txt" title="LLMs.txt" />
+        <link rel="ai-plugin" href="https://path401.com/.well-known/ai-plugin.json" />
+        <link rel="alternate" type="text/plain" href="https://path401.com/llms.txt" title="LLMs.txt" />
       </head>
       <body className={`${inter.variable} ${mono.variable} ${orbitron.variable} font-mono antialiased`}>
         <ThemeProvider>

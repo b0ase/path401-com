@@ -32,8 +32,8 @@ function getNavItems() {
 
 function getDefaultNavItems() {
   return [
-    { href: 'https://path401.com', label: '$401', external: true },
-    { href: '/', label: '$402' },
+    { href: '/', label: '$401' },
+    { href: 'https://path402.com', label: '$402', external: true },
     { href: 'https://path403.com', label: '$403', external: true },
     ...sharedNavItems,
   ];

@@ -43,13 +43,13 @@ export default function Page401() {
 
       {/* ═══ HERO ═══ */}
       <section className="relative min-h-[80vh] flex flex-col justify-center overflow-hidden bg-black">
-        {/* Background video */}
+        {/* Background video — inside HUD frame */}
         <video
           autoPlay
           muted
           loop
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-25"
+          className="absolute top-6 left-6 right-6 bottom-6 w-[calc(100%-48px)] h-[calc(100%-48px)] object-cover opacity-25"
         >
           <source src="/401-hero.mp4" type="video/mp4" />
         </video>
@@ -147,10 +147,10 @@ export default function Page401() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="mb-4"
+            className="mb-2"
           >
-            <span className="text-zinc-500 text-xs tracking-[0.4em] uppercase font-mono">
-              FOLLOW YOUR OWN PATH
+            <span className="text-zinc-400 text-2xl md:text-4xl tracking-[0.3em] uppercase font-display font-black">
+              PATH 401 &mdash; FOLLOW YOUR OWN PATH
             </span>
           </motion.div>
 
@@ -160,9 +160,11 @@ export default function Page401() {
             transition={{ duration: 0.6, delay: 0.7 }}
             className="text-zinc-500 max-w-xl text-sm leading-relaxed mb-12 font-mono"
           >
-            Before you can follow the money, you need to know who you are.
-            The <code className="text-red-400 bg-zinc-900 px-1.5 py-0.5 border border-zinc-800">$401</code> token
-            is your cryptographic identity &mdash; encrypted, self-sovereign, and inscribed on-chain forever.
+            The <code className="text-red-400 bg-zinc-900 px-1.5 py-0.5 border border-zinc-800">$401</code> is
+            proof of stake for your identity &mdash; a root key protocol that anchors your HD wallet to an encrypted
+            inscription on-chain. Build your identity bundle at{' '}
+            <a href="https://bit-sign.online" target="_blank" rel="noopener noreferrer" className="text-red-400 hover:text-red-300 transition-colors underline underline-offset-2">bit-sign.online</a>
+            {' '}&mdash; identity templates with selective reveal. Prove what you need to, nothing more.
           </motion.p>
 
           <motion.div
