@@ -592,6 +592,111 @@ export default function Page401() {
         </div>
       </motion.section>
 
+      {/* ═══ TRUST MODEL ═══ */}
+      <motion.section
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-80px" }}
+        className="border-b border-zinc-200 dark:border-zinc-900"
+      >
+        <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
+          <motion.div custom={0} variants={fadeIn} className="section-label">
+            Trust Model
+          </motion.div>
+          <motion.p custom={0.05} variants={fadeUp} className="text-zinc-500 text-sm font-mono mb-8 max-w-2xl">
+            We believe transparency is the foundation of trust. Here is exactly what is centralised,
+            what is decentralised, and what we&apos;re working on. No hand-waving.
+          </motion.p>
+          <div className="grid md:grid-cols-2 gap-0 border border-zinc-200 dark:border-zinc-800">
+            {/* What's centralised */}
+            <motion.div custom={0.1} variants={fadeUp} className="p-8 md:p-10 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="w-3 h-3 rounded-full bg-amber-500/80" />
+                <h3 className="text-sm font-display font-black uppercase tracking-wider">What&apos;s Centralised</h3>
+              </div>
+              <div className="space-y-4">
+                {[
+                  ['User accounts', 'Your account lives in our database on a server we control. We can read it. We could delete it.'],
+                  ['Attestation service', 'Right now, b0ase.com signs your strands. We are the attestor. That means you\'re trusting us.'],
+                  ['Payment', 'HandCash processes payments. They are a custodial wallet. Your keys, their server.'],
+                  ['OAuth providers', 'Google, Twitter, GitHub verify your accounts. If they revoke access, the strand still exists on-chain but can\'t be re-verified.'],
+                ].map(([label, desc]) => (
+                  <div key={label}>
+                    <p className="text-sm font-bold mb-1">{label}</p>
+                    <p className="text-zinc-500 text-xs leading-relaxed">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* What's decentralised */}
+            <motion.div custom={0.2} variants={fadeUp} className="p-8 md:p-10">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="w-3 h-3 rounded-full bg-green-500/80" />
+                <h3 className="text-sm font-display font-black uppercase tracking-wider">What&apos;s On-Chain</h3>
+              </div>
+              <div className="space-y-4">
+                {[
+                  ['Your inscriptions', 'Every strand is written to the BSV blockchain. We can\'t edit it, delete it, or pretend it doesn\'t exist. Anyone can verify it.'],
+                  ['Your root key', 'If you sign with your own key (via Yours wallet or bit-sign.online), you hold the root. We don\'t.'],
+                  ['The code', 'This site\'s source code is on GitHub. Every commit is inscribed on-chain via BitGit. You can audit everything.'],
+                  ['The proofs', 'SHA-256 hashes of your OAuth tokens are inscribed. The math is public. The verification is permissionless.'],
+                ].map(([label, desc]) => (
+                  <div key={label}>
+                    <p className="text-sm font-bold mb-1">{label}</p>
+                    <p className="text-zinc-500 text-xs leading-relaxed">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* The roadmap to sovereignty */}
+          <motion.div custom={0.3} variants={fadeUp} className="border border-zinc-200 dark:border-zinc-800 border-t-0 p-8 md:p-10">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="w-3 h-3 rounded-full bg-green-500/80 animate-pulse" />
+              <h3 className="text-sm font-display font-black uppercase tracking-wider">The Path To Self-Sovereignty</h3>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                {
+                  phase: 'Now',
+                  status: 'live',
+                  desc: 'b0ase.com signs your strands. You trust us. Your inscriptions are on-chain and permanent, but we are the attestor.',
+                },
+                {
+                  phase: 'Next',
+                  status: 'building',
+                  desc: 'Self-signing via your own BSV key. You sign your own strands. b0ase becomes optional, not required. Peer attestation begins.',
+                },
+                {
+                  phase: 'Goal',
+                  status: 'planned',
+                  desc: 'Fully self-sovereign. No b0ase dependency. Any wallet, any attestor, any verifier. The protocol runs without us.',
+                },
+              ].map((item) => (
+                <div key={item.phase}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-green-500">{item.phase}</span>
+                    <span className={`text-[8px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded ${
+                      item.status === 'live' ? 'bg-green-500/10 text-green-400' :
+                      item.status === 'building' ? 'bg-amber-500/10 text-amber-400' :
+                      'bg-zinc-500/10 text-zinc-500'
+                    }`}>{item.status}</span>
+                  </div>
+                  <p className="text-zinc-500 text-xs leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.p custom={0.4} variants={fadeIn} className="text-zinc-500 text-xs mt-4 font-mono">
+            We are not decentralised yet. We are building towards it, in public, with every commit inscribed on-chain.
+            If we disappear tomorrow, your inscriptions survive. That&apos;s the minimum guarantee.
+          </motion.p>
+        </div>
+      </motion.section>
+
       {/* ═══ CTA ═══ */}
       <motion.section
         initial="hidden"
