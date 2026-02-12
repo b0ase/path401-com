@@ -89,7 +89,7 @@ export default function Page401() {
           <div className="absolute bottom-6 left-6 w-12 h-12 border-l-2 border-b-2 border-green-500/10" />
           <div className="absolute bottom-6 right-6 w-12 h-12 border-r-2 border-b-2 border-green-500/10" />
           <div className="absolute top-8 left-20 text-[7px] font-mono text-zinc-700 tracking-[0.25em]">
-            $401 IDENTITY PROTOCOL
+            $401 KEY CHAIN
           </div>
           <div className="absolute bottom-8 left-20 text-[7px] font-mono text-zinc-700 tracking-[0.25em]">
             HTTP 401: UNAUTHORIZED
@@ -153,7 +153,7 @@ export default function Page401() {
               className="mb-2"
             >
               <span className="text-zinc-400 text-xl md:text-2xl tracking-[0.3em] uppercase font-display font-black">
-                PATH 401 &mdash; FOLLOW YOUR OWN PATH
+                SIGN IN TO THE BLOCKCHAIN
               </span>
             </motion.div>
 
@@ -163,11 +163,10 @@ export default function Page401() {
               transition={{ duration: 0.6, delay: 0.7 }}
               className="text-zinc-500 max-w-xl text-sm leading-relaxed mb-12 font-mono"
             >
-              The <code className="text-green-400 bg-zinc-900 px-1.5 py-0.5 border border-zinc-800">$401</code> is
-              proof of stake for your identity &mdash; a root key protocol that anchors your HD wallet to an encrypted
-              inscription on-chain. Build your identity bundle at{' '}
-              <a href="https://bit-sign.online" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:text-green-300 transition-colors underline underline-offset-2">bit-sign.online</a>
-              {' '}&mdash; identity templates with selective reveal. Prove what you need to, nothing more.
+              Link your socials. Mint your identity. One penny per strand. Your{' '}
+              <code className="text-green-400 bg-zinc-900 px-1.5 py-0.5 border border-zinc-800">$401</code> is
+              a cryptographic chain of every account you control &mdash; Google, Twitter, GitHub, Microsoft, Apple &mdash;
+              all anchored to a single root key on the blockchain. Nobody can fake it. Nobody can take it away.
             </motion.p>
 
             <motion.div
@@ -180,17 +179,15 @@ export default function Page401() {
                 href="/identity"
                 className="group relative inline-flex items-center gap-3 px-8 py-4 bg-green-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-green-700 transition-all overflow-hidden"
               >
-                Mint Your Identity
+                Link Your Socials
                 <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
               </Link>
-              <a
-                href="https://bit-sign.online"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/id-tree"
                 className="inline-flex items-center gap-3 px-8 py-4 border border-zinc-800 text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-green-500/50 hover:text-green-400 transition-all"
               >
-                bit-sign.online &rarr;
-              </a>
+                How It Works &rarr;
+              </Link>
             </motion.div>
           </div>
 
@@ -366,26 +363,26 @@ export default function Page401() {
             {[
               {
                 step: '01',
-                title: 'Encrypt your documents',
-                desc: 'At bit-sign.online, encrypt your passport or ID into a sealed cryptographic bundle. Nobody can read it without your key.',
+                title: 'Link a social account',
+                desc: 'Sign in with Google, Twitter, GitHub, Microsoft, Apple — any OAuth provider. Each connection proves you control that account right now.',
                 accent: false,
               },
               {
                 step: '02',
-                title: 'Inscribe the root',
-                desc: 'The encrypted bundle is written to the blockchain as your root inscription — a permanent, tamper-proof anchor for your identity.',
+                title: 'Mint a strand',
+                desc: 'Each linked account becomes a strand on your key chain — inscribed on the blockchain with a SHA-256 proof. One penny per strand.',
                 accent: false,
               },
               {
                 step: '03',
-                title: 'Mint your $401 token',
-                desc: 'Choose your symbol — $BOASE, $ALICE, $YOU — and mint your identity token. It traces back to your root inscription forever.',
+                title: 'Build your key chain',
+                desc: 'Link more accounts, bind strands together. The more keys on your chain, the stronger your identity. Self-attested or service-attested.',
                 accent: false,
               },
               {
                 step: '04',
-                title: 'Pair with $402',
-                desc: 'Your $401 unlocks the full protocol. Earn dividends, operate nodes, write legally binding documents, commit code with attribution.',
+                title: 'Unlock the protocol',
+                desc: 'Your $401 key chain pairs with $402 (payment) and $403 (conditions). Earn dividends, operate nodes, write contracts, commit code.',
                 accent: true,
               },
             ].map((item, i) => (
@@ -608,28 +605,28 @@ export default function Page401() {
             variants={fadeUp}
             className="text-3xl md:text-5xl font-display font-black tracking-tighter mb-6"
           >
-            FOLLOW YOUR<br />
-            <span className="text-green-500">OWN PATH</span>
+            SIGN IN TO<br />
+            <span className="text-green-500">THE BLOCKCHAIN</span>
           </motion.h2>
           <motion.p
             custom={0.2}
             variants={fadeIn}
             className="text-zinc-500 mb-10 text-sm font-mono"
           >
-            Mint your identity. Own your name. Build on the protocol.
+            Link your socials. Mint your key chain. One penny per strand.
           </motion.p>
           <motion.div custom={0.3} variants={fadeUp} className="flex flex-wrap justify-center gap-4">
             <Link
               href="/identity"
               className="inline-flex items-center gap-3 px-10 py-5 bg-green-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-green-700 transition-colors"
             >
-              Mint $401 Identity
+              Link Your Socials
             </Link>
             <Link
-              href="/"
+              href="/id-tree"
               className="inline-flex items-center gap-2 px-10 py-5 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-zinc-900 dark:hover:text-white transition-colors"
             >
-              $402 Protocol &rarr;
+              How It Works &rarr;
             </Link>
           </motion.div>
         </div>
