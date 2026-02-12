@@ -50,7 +50,7 @@ export default function Page401() {
           loop
           playsInline
           className="absolute top-6 left-6 right-6 bottom-6 w-[calc(100%-48px)] h-[calc(100%-48px)] object-cover opacity-25"
-          style={{ filter: 'hue-rotate(95deg) saturate(1.4) brightness(1.1)' }}
+          style={{ filter: 'hue-rotate(85deg) saturate(1.6) brightness(1.4)' }}
         >
           <source src="/401-hero.mp4" type="video/mp4" />
         </video>
@@ -111,7 +111,7 @@ export default function Page401() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
               </span>
               <span className="text-zinc-600 text-[10px] tracking-[0.3em] uppercase font-mono font-bold">
-                HTTP 401 : UNAUTHORIZED &mdash; PROVE WHO YOU ARE
+                HTTP 401 : UNAUTHORIZED
               </span>
             </motion.div>
 
@@ -161,147 +161,133 @@ export default function Page401() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
-              className="text-zinc-500 max-w-xl text-sm leading-relaxed mb-12 font-mono"
+              className="text-zinc-500 max-w-xl text-sm leading-relaxed mb-8 font-mono"
             >
-              Link your socials. Mint your identity. One penny per strand. Your{' '}
-              <code className="text-green-400 bg-zinc-900 px-1.5 py-0.5 border border-zinc-800">$401</code> is
-              a cryptographic chain of every account you control &mdash; Google, Twitter, GitHub, Microsoft, Apple &mdash;
-              all anchored to a single root key on the blockchain. Nobody can fake it. Nobody can take it away.
+              Link your socials. Mint your key chain.
+              One penny per strand. Anchored to your root key on the blockchain forever.
             </motion.p>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.9 }}
-              className="flex flex-wrap gap-4"
+              className="flex items-center gap-4"
             >
-              <Link
-                href="/identity"
-                className="group relative inline-flex items-center gap-3 px-8 py-4 bg-green-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-green-700 transition-all overflow-hidden"
-              >
-                Link Your Socials
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-              </Link>
-              <Link
-                href="/id-tree"
-                className="inline-flex items-center gap-3 px-8 py-4 border border-zinc-800 text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-green-500/50 hover:text-green-400 transition-all"
-              >
+              <Link href="/id-tree" className="text-[9px] font-mono text-green-500/70 hover:text-green-400 uppercase tracking-widest transition-colors">
                 How It Works &rarr;
               </Link>
             </motion.div>
           </div>
 
-          {/* Right: Identity Tree Graphic (desktop only) */}
+          {/* Right: Interactive Key Chain Card (desktop only) */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.85 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, delay: 0.6, ease }}
-            className="hidden lg:block w-[540px] xl:w-[600px] shrink-0 -ml-8"
+            transition={{ duration: 1, delay: 0.4, ease }}
+            className="hidden lg:block w-[560px] xl:w-[640px] shrink-0"
           >
-            <Link href="/id-tree" className="block group border border-zinc-800 bg-zinc-950/60 backdrop-blur-sm aspect-square flex flex-col overflow-hidden hover:border-green-500/30 transition-colors">
+            <div className="border border-zinc-800 bg-zinc-950/80 backdrop-blur-sm overflow-hidden">
+              {/* Title bar */}
               <div className="px-5 py-2.5 flex items-center justify-between border-b border-green-500/20 bg-green-500/5">
-                <span className="text-[9px] font-mono font-bold text-green-400/70 uppercase tracking-[0.2em]">$401 Identity Tree</span>
-                <span className="text-[8px] font-mono text-zinc-600 uppercase tracking-widest group-hover:text-green-400 transition-colors">Explore &rarr;</span>
+                <span className="text-[9px] font-mono font-bold text-green-400/70 uppercase tracking-[0.2em]">$401 Key Chain</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[8px] font-mono text-zinc-600 uppercase tracking-widest">1&cent; per strand</span>
+                  <Link href="/id-tree" className="text-[8px] font-mono text-zinc-600 uppercase tracking-widest hover:text-green-400 transition-colors">
+                    Details &rarr;
+                  </Link>
+                </div>
               </div>
-              <div className="p-5 pb-4 flex-1 flex flex-col">
-              <svg viewBox="10 10 340 400" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full flex-1">
-                {/* Animated dash style */}
-                <style>{`
-                  @keyframes dash-flow { to { stroke-dashoffset: -20; } }
-                  .tree-line { stroke-dasharray: 6 4; animation: dash-flow 3s linear infinite; }
-                  .tree-line-slow { stroke-dasharray: 4 6; animation: dash-flow 4s linear infinite; }
-                `}</style>
 
-                {/* Glow behind root */}
-                <circle cx="180" cy="52" r="60" fill="rgba(34,197,94,0.04)" />
+              {/* Tree layout */}
+              <div className="p-6 md:p-8">
+                {/* ROOT KEY */}
+                <div className="flex justify-center mb-2">
+                  <div className="px-6 py-3 border-2 border-green-500/60 bg-green-500/8 rounded-lg text-center">
+                    <div className="font-display font-black text-sm tracking-wider text-white">ROOT KEY</div>
+                    <div className="text-[9px] font-mono text-zinc-500 mt-0.5">your private key &mdash; self-signed</div>
+                  </div>
+                </div>
 
-                {/* ── Lines: Root → Strands ── */}
-                <line x1="180" y1="72" x2="72" y2="150" className="tree-line" stroke="rgba(34,197,94,0.25)" strokeWidth="1.5" />
-                <line x1="180" y1="72" x2="180" y2="150" className="tree-line" stroke="rgba(34,197,94,0.25)" strokeWidth="1.5" />
-                <line x1="180" y1="72" x2="288" y2="150" className="tree-line" stroke="rgba(34,197,94,0.25)" strokeWidth="1.5" />
+                {/* Connector: root → strands */}
+                <div className="flex justify-center">
+                  <div className="w-px h-6 bg-gradient-to-b from-green-500/40 to-green-500/20" />
+                </div>
 
-                {/* ── Lines: Strands → Attestors ── */}
-                <line x1="72" y1="190" x2="48" y2="250" className="tree-line-slow" stroke="rgba(245,158,11,0.2)" strokeWidth="1" />
-                <line x1="72" y1="190" x2="96" y2="250" className="tree-line-slow" stroke="rgba(34,197,94,0.25)" strokeWidth="1" />
-                <line x1="180" y1="190" x2="156" y2="250" className="tree-line-slow" stroke="rgba(245,158,11,0.2)" strokeWidth="1" />
-                <line x1="180" y1="190" x2="204" y2="250" className="tree-line-slow" stroke="rgba(34,197,94,0.25)" strokeWidth="1" />
-                <line x1="288" y1="190" x2="264" y2="250" className="tree-line-slow" stroke="rgba(245,158,11,0.2)" strokeWidth="1" />
-                <line x1="288" y1="190" x2="312" y2="250" className="tree-line-slow" stroke="rgba(34,197,94,0.25)" strokeWidth="1" />
+                {/* STRANDS label */}
+                <div className="text-center mb-3">
+                  <span className="text-[8px] font-mono font-bold text-amber-500/50 uppercase tracking-[0.2em]">Link a strand</span>
+                </div>
 
-                {/* ── Lines: Attestors → Economic ── */}
-                <line x1="72" y1="278" x2="180" y2="330" className="tree-line-slow" stroke="rgba(234,179,8,0.15)" strokeWidth="1" />
-                <line x1="180" y1="278" x2="180" y2="330" className="tree-line-slow" stroke="rgba(234,179,8,0.15)" strokeWidth="1" />
-                <line x1="288" y1="278" x2="180" y2="330" className="tree-line-slow" stroke="rgba(234,179,8,0.15)" strokeWidth="1" />
+                {/* OAuth provider strand buttons — 6 across */}
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-2">
+                  {[
+                    { name: 'Google', color: 'hover:border-[#4285F4]/50 hover:shadow-[0_0_12px_rgba(66,133,244,0.15)]', icon: (
+                      <svg viewBox="0 0 24 24" className="w-6 h-6">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                      </svg>
+                    )},
+                    { name: 'Twitter', color: 'hover:border-white/30 hover:shadow-[0_0_12px_rgba(255,255,255,0.1)]', icon: (
+                      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                    )},
+                    { name: 'GitHub', color: 'hover:border-white/30 hover:shadow-[0_0_12px_rgba(255,255,255,0.1)]', icon: (
+                      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white">
+                        <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+                      </svg>
+                    )},
+                    { name: 'Microsoft', color: 'hover:border-[#00A4EF]/50 hover:shadow-[0_0_12px_rgba(0,164,239,0.15)]', icon: (
+                      <svg viewBox="0 0 24 24" className="w-6 h-6">
+                        <path d="M3 3h8.5v8.5H3V3z" fill="#F25022"/>
+                        <path d="M12.5 3H21v8.5h-8.5V3z" fill="#7FBA00"/>
+                        <path d="M3 12.5h8.5V21H3v-8.5z" fill="#00A4EF"/>
+                        <path d="M12.5 12.5H21V21h-8.5v-8.5z" fill="#FFB900"/>
+                      </svg>
+                    )},
+                    { name: 'Apple', color: 'hover:border-white/30 hover:shadow-[0_0_12px_rgba(255,255,255,0.1)]', icon: (
+                      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white">
+                        <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.32-1.55 4.31-3.74 4.25z"/>
+                      </svg>
+                    )},
+                    { name: 'LinkedIn', color: 'hover:border-[#0A66C2]/50 hover:shadow-[0_0_12px_rgba(10,102,194,0.15)]', icon: (
+                      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="#0A66C2">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                      </svg>
+                    )},
+                  ].map((provider) => (
+                    <Link
+                      key={provider.name}
+                      href="/identity"
+                      className={`group flex flex-col items-center gap-2 py-4 px-3 border border-zinc-800/80 bg-zinc-900/40 transition-all duration-200 ${provider.color}`}
+                    >
+                      <span className="opacity-60 group-hover:opacity-100 transition-opacity">{provider.icon}</span>
+                      <span className="text-[9px] font-mono text-zinc-500 group-hover:text-white uppercase tracking-widest transition-colors">{provider.name}</span>
+                      <span className="text-[7px] font-mono text-amber-500/40 group-hover:text-amber-400/70 uppercase tracking-widest transition-colors">strand</span>
+                    </Link>
+                  ))}
+                </div>
 
-                {/* ── Lines: Economic → $402/$403 ── */}
-                <line x1="180" y1="360" x2="140" y2="395" className="tree-line-slow" stroke="rgba(234,179,8,0.2)" strokeWidth="1" />
-                <line x1="180" y1="360" x2="220" y2="395" className="tree-line-slow" stroke="rgba(168,85,247,0.2)" strokeWidth="1" />
+                {/* Connector: strands → economic */}
+                <div className="flex justify-center">
+                  <div className="w-px h-5 bg-gradient-to-b from-amber-500/20 to-yellow-500/10" />
+                </div>
 
-                {/* ── Root Key node ── */}
-                <rect x="128" y="24" width="104" height="54" rx="8" fill="rgba(34,197,94,0.08)" stroke="rgba(34,197,94,0.6)" strokeWidth="1.5" />
-                <text x="180" y="47" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="11" fontFamily="var(--font-orbitron), monospace" fontWeight="700" letterSpacing="0.1em">ROOT KEY</text>
-                <text x="180" y="64" textAnchor="middle" fill="rgba(161,161,170,0.7)" fontSize="8" fontFamily="monospace" letterSpacing="0.05em">self-signed</text>
-
-                {/* ── Key ops (dashed pills) ── */}
-                <rect x="268" y="36" width="56" height="24" rx="12" fill="none" stroke="rgba(134,239,172,0.25)" strokeWidth="1" strokeDasharray="3 2" />
-                <text x="296" y="52" textAnchor="middle" fill="rgba(134,239,172,0.5)" fontSize="7" fontFamily="monospace">ROTATE</text>
-                <line x1="232" y1="51" x2="268" y2="49" stroke="rgba(134,239,172,0.15)" strokeWidth="1" strokeDasharray="3 3" />
-
-                {/* ── Strand: GitHub ── */}
-                <rect x="28" y="148" width="88" height="46" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.5)" strokeWidth="1" />
-                <text x="72" y="168" textAnchor="middle" fill="rgba(255,255,255,0.85)" fontSize="10" fontFamily="var(--font-orbitron), monospace" fontWeight="700" letterSpacing="0.08em">STRAND</text>
-                <text x="72" y="183" textAnchor="middle" fill="rgba(245,158,11,0.7)" fontSize="8" fontFamily="monospace">GitHub</text>
-
-                {/* ── Strand: Twitter ── */}
-                <rect x="136" y="148" width="88" height="46" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.5)" strokeWidth="1" />
-                <text x="180" y="168" textAnchor="middle" fill="rgba(255,255,255,0.85)" fontSize="10" fontFamily="var(--font-orbitron), monospace" fontWeight="700" letterSpacing="0.08em">STRAND</text>
-                <text x="180" y="183" textAnchor="middle" fill="rgba(245,158,11,0.7)" fontSize="8" fontFamily="monospace">Twitter</text>
-
-                {/* ── Strand: Google ── */}
-                <rect x="244" y="148" width="88" height="46" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.5)" strokeWidth="1" />
-                <text x="288" y="168" textAnchor="middle" fill="rgba(255,255,255,0.85)" fontSize="10" fontFamily="var(--font-orbitron), monospace" fontWeight="700" letterSpacing="0.08em">STRAND</text>
-                <text x="288" y="183" textAnchor="middle" fill="rgba(245,158,11,0.7)" fontSize="8" fontFamily="monospace">Google</text>
-
-                {/* ── Attestors (small pills) ── */}
-                {/* GitHub attestors */}
-                <rect x="18" y="250" width="56" height="24" rx="12" fill="rgba(113,113,122,0.06)" stroke="rgba(113,113,122,0.35)" strokeWidth="1" />
-                <text x="46" y="265" textAnchor="middle" fill="rgba(161,161,170,0.7)" fontSize="8" fontFamily="monospace">b0ase</text>
-                <rect x="78" y="250" width="44" height="24" rx="12" fill="rgba(34,197,94,0.06)" stroke="rgba(34,197,94,0.4)" strokeWidth="1" />
-                <text x="100" y="265" textAnchor="middle" fill="rgba(34,197,94,0.7)" fontSize="8" fontFamily="monospace">self</text>
-
-                {/* Twitter attestors */}
-                <rect x="132" y="250" width="48" height="24" rx="12" fill="rgba(113,113,122,0.06)" stroke="rgba(113,113,122,0.35)" strokeWidth="1" />
-                <text x="156" y="265" textAnchor="middle" fill="rgba(161,161,170,0.7)" fontSize="8" fontFamily="monospace">x.com</text>
-                <rect x="184" y="250" width="44" height="24" rx="12" fill="rgba(34,197,94,0.06)" stroke="rgba(34,197,94,0.4)" strokeWidth="1" />
-                <text x="206" y="265" textAnchor="middle" fill="rgba(34,197,94,0.7)" fontSize="8" fontFamily="monospace">self</text>
-
-                {/* Google attestors */}
-                <rect x="240" y="250" width="56" height="24" rx="12" fill="rgba(113,113,122,0.06)" stroke="rgba(113,113,122,0.35)" strokeWidth="1" />
-                <text x="268" y="265" textAnchor="middle" fill="rgba(161,161,170,0.7)" fontSize="8" fontFamily="monospace">google</text>
-                <rect x="300" y="250" width="44" height="24" rx="12" fill="rgba(34,197,94,0.06)" stroke="rgba(34,197,94,0.4)" strokeWidth="1" />
-                <text x="322" y="265" textAnchor="middle" fill="rgba(34,197,94,0.7)" fontSize="8" fontFamily="monospace">self</text>
-
-                {/* ── Economic layer ── */}
-                <rect x="125" y="322" width="110" height="42" rx="6" fill="rgba(234,179,8,0.05)" stroke="rgba(234,179,8,0.3)" strokeWidth="1" />
-                <text x="180" y="341" textAnchor="middle" fill="rgba(255,255,255,0.75)" fontSize="10" fontFamily="var(--font-orbitron), monospace" fontWeight="700" letterSpacing="0.08em">ECONOMIC</text>
-                <text x="180" y="356" textAnchor="middle" fill="rgba(234,179,8,0.6)" fontSize="8" fontFamily="monospace">layer</text>
-
-                {/* ── $402 ── */}
-                <rect x="104" y="386" width="66" height="30" rx="5" fill="rgba(234,179,8,0.05)" stroke="rgba(234,179,8,0.4)" strokeWidth="1" />
-                <text x="137" y="405" textAnchor="middle" fill="rgba(234,179,8,0.8)" fontSize="10" fontFamily="var(--font-orbitron), monospace" fontWeight="700">$402</text>
-
-                {/* ── $403 ── */}
-                <rect x="190" y="386" width="66" height="30" rx="5" fill="rgba(168,85,247,0.05)" stroke="rgba(168,85,247,0.4)" strokeWidth="1" />
-                <text x="223" y="405" textAnchor="middle" fill="rgba(168,85,247,0.8)" fontSize="10" fontFamily="var(--font-orbitron), monospace" fontWeight="700">$403</text>
-
-                {/* ── Label row labels ── */}
-                <text x="12" y="55" fill="rgba(34,197,94,0.4)" fontSize="7" fontFamily="monospace" fontWeight="700" letterSpacing="0.15em">ROOT</text>
-                <text x="12" y="172" fill="rgba(245,158,11,0.4)" fontSize="7" fontFamily="monospace" fontWeight="700" letterSpacing="0.15em">STRANDS</text>
-                <text x="12" y="265" fill="rgba(113,113,122,0.4)" fontSize="7" fontFamily="monospace" fontWeight="700" letterSpacing="0.12em">ATTESTORS</text>
-                <text x="12" y="346" fill="rgba(234,179,8,0.4)" fontSize="7" fontFamily="monospace" fontWeight="700" letterSpacing="0.15em">ECON</text>
-              </svg>
+                {/* Economic layer + $402/$403 */}
+                <div className="flex justify-center gap-3">
+                  <Link href="https://path402.com" className="px-4 py-2 border border-yellow-500/30 bg-yellow-500/5 text-center hover:border-yellow-500/50 transition-colors">
+                    <div className="font-display font-bold text-xs text-yellow-500/80">$402</div>
+                    <div className="text-[7px] font-mono text-zinc-600">payment</div>
+                  </Link>
+                  <Link href="/id-tree" className="px-4 py-2 border border-purple-500/30 bg-purple-500/5 text-center hover:border-purple-500/50 transition-colors">
+                    <div className="font-display font-bold text-xs text-purple-500/80">$403</div>
+                    <div className="text-[7px] font-mono text-zinc-600">conditions</div>
+                  </Link>
+                </div>
               </div>
-            </Link>
+            </div>
           </motion.div>
         </div>
 
