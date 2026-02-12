@@ -184,9 +184,9 @@ export default function Page401() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.4, ease }}
-            className="hidden lg:block w-[560px] xl:w-[640px] shrink-0"
+            className="hidden lg:block w-[640px] xl:w-[740px] shrink-0 -ml-8"
           >
-            <div className="border border-zinc-800 bg-zinc-950/80 backdrop-blur-sm overflow-hidden">
+            <Link href="/id-tree" className="block border border-zinc-800 bg-zinc-950/80 backdrop-blur-sm overflow-hidden hover:border-green-500/30 transition-colors">
               {/* Title bar */}
               <div className="px-5 py-2.5 flex items-center justify-between border-b border-green-500/20 bg-green-500/5">
                 <span className="text-[9px] font-mono font-bold text-green-400/70 uppercase tracking-[0.2em]">$401 Key Chain</span>
@@ -258,15 +258,14 @@ export default function Page401() {
                       </svg>
                     )},
                   ].map((provider) => (
-                    <Link
+                    <div
                       key={provider.name}
-                      href="/identity"
                       className={`group flex flex-col items-center gap-2 py-4 px-3 border border-zinc-800/80 bg-zinc-900/40 transition-all duration-200 ${provider.color}`}
                     >
                       <span className="opacity-60 group-hover:opacity-100 transition-opacity">{provider.icon}</span>
                       <span className="text-[9px] font-mono text-zinc-500 group-hover:text-white uppercase tracking-widest transition-colors">{provider.name}</span>
                       <span className="text-[7px] font-mono text-amber-500/40 group-hover:text-amber-400/70 uppercase tracking-widest transition-colors">strand</span>
-                    </Link>
+                    </div>
                   ))}
                 </div>
 
@@ -277,17 +276,17 @@ export default function Page401() {
 
                 {/* Economic layer + $402/$403 */}
                 <div className="flex justify-center gap-3">
-                  <Link href="https://path402.com" className="px-4 py-2 border border-yellow-500/30 bg-yellow-500/5 text-center hover:border-yellow-500/50 transition-colors">
+                  <div className="px-4 py-2 border border-yellow-500/30 bg-yellow-500/5 text-center">
                     <div className="font-display font-bold text-xs text-yellow-500/80">$402</div>
                     <div className="text-[7px] font-mono text-zinc-600">payment</div>
-                  </Link>
-                  <Link href="/id-tree" className="px-4 py-2 border border-purple-500/30 bg-purple-500/5 text-center hover:border-purple-500/50 transition-colors">
+                  </div>
+                  <div className="px-4 py-2 border border-purple-500/30 bg-purple-500/5 text-center">
                     <div className="font-display font-bold text-xs text-purple-500/80">$403</div>
                     <div className="text-[7px] font-mono text-zinc-600">conditions</div>
-                  </Link>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </motion.div>
         </div>
 
