@@ -204,8 +204,8 @@ export default function Hero401() {
                   </h2>
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center gap-3">
-                      <span className="w-2 h-2 bg-red-500/80 shrink-0" />
-                      <span className="text-sm text-zinc-400"><span className="text-red-400 font-bold">Surveillance</span> &mdash; state watches you</span>
+                      <span className="w-2 h-2 bg-green-500/80 shrink-0" />
+                      <span className="text-sm text-zinc-400"><span className="text-green-400 font-bold">Surveillance</span> &mdash; state watches you</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="w-2 h-2 bg-amber-500/80 shrink-0" />

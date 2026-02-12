@@ -93,7 +93,7 @@ function PreMintView({ onMint, isMinting, mintError }: {
                 </div>
               )}
               {symbolInput && !isValid && (
-                <div className="mt-2 text-xs font-mono text-red-500">
+                <div className="mt-2 text-xs font-mono text-green-500">
                   A-Z, 0-9, _ only. 1-20 characters.
                 </div>
               )}
@@ -118,7 +118,7 @@ function PreMintView({ onMint, isMinting, mintError }: {
 
         <div className="mt-6">
           {mintError && (
-            <div className="mb-3 text-xs font-mono text-red-500 bg-red-500/10 border border-red-500/20 p-2">
+            <div className="mb-3 text-xs font-mono text-green-500 bg-green-500/10 border border-green-500/20 p-2">
               {mintError}
             </div>
           )}

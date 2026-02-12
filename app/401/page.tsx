@@ -50,6 +50,7 @@ export default function Page401() {
           loop
           playsInline
           className="absolute top-6 left-6 right-6 bottom-6 w-[calc(100%-48px)] h-[calc(100%-48px)] object-cover opacity-25"
+          style={{ filter: 'hue-rotate(95deg) saturate(1.4) brightness(1.1)' }}
         >
           <source src="/401-hero.mp4" type="video/mp4" />
         </video>
@@ -58,17 +59,17 @@ export default function Page401() {
         <div
           className="absolute inset-0 pointer-events-none opacity-[0.03]"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(239, 68, 68, 0.8) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(circle, rgba(34, 197, 94, 0.8) 1px, transparent 1px)',
             backgroundSize: '40px 40px',
           }}
         />
 
-        {/* Radial glow — red for identity */}
+        {/* Radial glow — green for identity */}
         <div className="absolute inset-0 pointer-events-none">
           <div
             className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[700px]"
             style={{
-              background: 'radial-gradient(ellipse at center, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.02) 35%, transparent 70%)',
+              background: 'radial-gradient(ellipse at center, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0.04) 35%, transparent 70%)',
             }}
           />
         </div>
@@ -83,10 +84,10 @@ export default function Page401() {
 
         {/* HUD corners */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-6 left-6 w-12 h-12 border-l-2 border-t-2 border-red-500/10" />
-          <div className="absolute top-6 right-6 w-12 h-12 border-r-2 border-t-2 border-red-500/10" />
-          <div className="absolute bottom-6 left-6 w-12 h-12 border-l-2 border-b-2 border-red-500/10" />
-          <div className="absolute bottom-6 right-6 w-12 h-12 border-r-2 border-b-2 border-red-500/10" />
+          <div className="absolute top-6 left-6 w-12 h-12 border-l-2 border-t-2 border-green-500/10" />
+          <div className="absolute top-6 right-6 w-12 h-12 border-r-2 border-t-2 border-green-500/10" />
+          <div className="absolute bottom-6 left-6 w-12 h-12 border-l-2 border-b-2 border-green-500/10" />
+          <div className="absolute bottom-6 right-6 w-12 h-12 border-r-2 border-b-2 border-green-500/10" />
           <div className="absolute top-8 left-20 text-[7px] font-mono text-zinc-700 tracking-[0.25em]">
             $401 IDENTITY PROTOCOL
           </div>
@@ -96,102 +97,218 @@ export default function Page401() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 px-6 md:px-16 max-w-[1920px] mx-auto w-full">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1, ease }}
-            className="flex items-center gap-3 mb-6"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-            </span>
-            <span className="text-zinc-600 text-[10px] tracking-[0.3em] uppercase font-mono font-bold">
-              HTTP 401 : UNAUTHORIZED &mdash; PROVE WHO YOU ARE
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 60 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease }}
-            className="font-display font-black tracking-tighter leading-[0.85] mb-0"
-            style={{
-              fontSize: 'clamp(4rem, 12vw, 12rem)',
-              textShadow: '0 0 10px rgba(239, 68, 68, 0.4), 0 0 30px rgba(239, 68, 68, 0.2), 0 0 60px rgba(239, 68, 68, 0.1)',
-            }}
-          >
-            <span className="text-white">$401</span>
-          </motion.h1>
-
-          {/* Reflection */}
-          <div
-            className="relative overflow-hidden h-6 md:h-10 select-none mb-0"
-            aria-hidden="true"
-            style={{
-              transform: 'scaleY(-1)',
-              WebkitMaskImage: 'linear-gradient(to bottom, rgba(255,255,255,0.1), transparent 80%)',
-              maskImage: 'linear-gradient(to bottom, rgba(255,255,255,0.1), transparent 80%)',
-            }}
-          >
-            <div
-              className="font-display font-black tracking-tighter leading-[0.85] text-red-400/30"
-              style={{ fontSize: 'clamp(4rem, 12vw, 12rem)' }}
+        <div className="relative z-10 px-6 md:px-16 max-w-[1920px] mx-auto w-full flex items-center">
+          {/* Left: Text */}
+          <div className="flex-1 min-w-0">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.1, ease }}
+              className="flex items-center gap-3 mb-6"
             >
-              $401
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+              </span>
+              <span className="text-zinc-600 text-[10px] tracking-[0.3em] uppercase font-mono font-bold">
+                HTTP 401 : UNAUTHORIZED &mdash; PROVE WHO YOU ARE
+              </span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease }}
+              className="font-display font-black tracking-tighter leading-[0.85] mb-0"
+              style={{
+                fontSize: 'clamp(4rem, 12vw, 12rem)',
+                textShadow: '0 0 10px rgba(34, 197, 94, 0.4), 0 0 30px rgba(34, 197, 94, 0.2), 0 0 60px rgba(34, 197, 94, 0.1)',
+              }}
+            >
+              <span className="text-white">$401</span>
+            </motion.h1>
+
+            {/* Reflection */}
+            <div
+              className="relative overflow-hidden h-6 md:h-10 select-none mb-0"
+              aria-hidden="true"
+              style={{
+                transform: 'scaleY(-1)',
+                WebkitMaskImage: 'linear-gradient(to bottom, rgba(255,255,255,0.1), transparent 80%)',
+                maskImage: 'linear-gradient(to bottom, rgba(255,255,255,0.1), transparent 80%)',
+              }}
+            >
+              <div
+                className="font-display font-black tracking-tighter leading-[0.85] text-green-400/30"
+                style={{ fontSize: 'clamp(4rem, 12vw, 12rem)' }}
+              >
+                $401
+              </div>
             </div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="mb-2"
+            >
+              <span className="text-zinc-400 text-xl md:text-2xl tracking-[0.3em] uppercase font-display font-black">
+                PATH 401 &mdash; FOLLOW YOUR OWN PATH
+              </span>
+            </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+              className="text-zinc-500 max-w-xl text-sm leading-relaxed mb-12 font-mono"
+            >
+              The <code className="text-green-400 bg-zinc-900 px-1.5 py-0.5 border border-zinc-800">$401</code> is
+              proof of stake for your identity &mdash; a root key protocol that anchors your HD wallet to an encrypted
+              inscription on-chain. Build your identity bundle at{' '}
+              <a href="https://bit-sign.online" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:text-green-300 transition-colors underline underline-offset-2">bit-sign.online</a>
+              {' '}&mdash; identity templates with selective reveal. Prove what you need to, nothing more.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.9 }}
+              className="flex flex-wrap gap-4"
+            >
+              <Link
+                href="/identity"
+                className="group relative inline-flex items-center gap-3 px-8 py-4 bg-green-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-green-700 transition-all overflow-hidden"
+              >
+                Mint Your Identity
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+              </Link>
+              <a
+                href="https://bit-sign.online"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-8 py-4 border border-zinc-800 text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-green-500/50 hover:text-green-400 transition-all"
+              >
+                bit-sign.online &rarr;
+              </a>
+            </motion.div>
           </div>
 
+          {/* Right: Identity Tree Graphic (desktop only) */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="mb-2"
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, delay: 0.6, ease }}
+            className="hidden lg:block w-[540px] xl:w-[600px] shrink-0 -ml-8"
           >
-            <span className="text-zinc-400 text-xl md:text-2xl tracking-[0.3em] uppercase font-display font-black">
-              PATH 401 &mdash; FOLLOW YOUR OWN PATH
-            </span>
-          </motion.div>
+            <Link href="/id-tree" className="block group border border-zinc-800 bg-zinc-950/60 backdrop-blur-sm aspect-square flex flex-col overflow-hidden hover:border-green-500/30 transition-colors">
+              <div className="px-5 py-2.5 flex items-center justify-between border-b border-green-500/20 bg-green-500/5">
+                <span className="text-[9px] font-mono font-bold text-green-400/70 uppercase tracking-[0.2em]">$401 Identity Tree</span>
+                <span className="text-[8px] font-mono text-zinc-600 uppercase tracking-widest group-hover:text-green-400 transition-colors">Explore &rarr;</span>
+              </div>
+              <div className="p-5 pb-4 flex-1 flex flex-col">
+              <svg viewBox="10 10 340 400" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full flex-1">
+                {/* Animated dash style */}
+                <style>{`
+                  @keyframes dash-flow { to { stroke-dashoffset: -20; } }
+                  .tree-line { stroke-dasharray: 6 4; animation: dash-flow 3s linear infinite; }
+                  .tree-line-slow { stroke-dasharray: 4 6; animation: dash-flow 4s linear infinite; }
+                `}</style>
 
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-            className="text-zinc-500 max-w-xl text-sm leading-relaxed mb-12 font-mono"
-          >
-            The <code className="text-red-400 bg-zinc-900 px-1.5 py-0.5 border border-zinc-800">$401</code> is
-            proof of stake for your identity &mdash; a root key protocol that anchors your HD wallet to an encrypted
-            inscription on-chain. Build your identity bundle at{' '}
-            <a href="https://bit-sign.online" target="_blank" rel="noopener noreferrer" className="text-red-400 hover:text-red-300 transition-colors underline underline-offset-2">bit-sign.online</a>
-            {' '}&mdash; identity templates with selective reveal. Prove what you need to, nothing more.
-          </motion.p>
+                {/* Glow behind root */}
+                <circle cx="180" cy="52" r="60" fill="rgba(34,197,94,0.04)" />
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.9 }}
-            className="flex flex-wrap gap-4"
-          >
-            <Link
-              href="/identity"
-              className="group relative inline-flex items-center gap-3 px-8 py-4 bg-red-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-red-700 transition-all overflow-hidden"
-            >
-              Mint Your Identity
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                {/* ── Lines: Root → Strands ── */}
+                <line x1="180" y1="72" x2="72" y2="150" className="tree-line" stroke="rgba(34,197,94,0.25)" strokeWidth="1.5" />
+                <line x1="180" y1="72" x2="180" y2="150" className="tree-line" stroke="rgba(34,197,94,0.25)" strokeWidth="1.5" />
+                <line x1="180" y1="72" x2="288" y2="150" className="tree-line" stroke="rgba(34,197,94,0.25)" strokeWidth="1.5" />
+
+                {/* ── Lines: Strands → Attestors ── */}
+                <line x1="72" y1="190" x2="48" y2="250" className="tree-line-slow" stroke="rgba(245,158,11,0.2)" strokeWidth="1" />
+                <line x1="72" y1="190" x2="96" y2="250" className="tree-line-slow" stroke="rgba(34,197,94,0.25)" strokeWidth="1" />
+                <line x1="180" y1="190" x2="156" y2="250" className="tree-line-slow" stroke="rgba(245,158,11,0.2)" strokeWidth="1" />
+                <line x1="180" y1="190" x2="204" y2="250" className="tree-line-slow" stroke="rgba(34,197,94,0.25)" strokeWidth="1" />
+                <line x1="288" y1="190" x2="264" y2="250" className="tree-line-slow" stroke="rgba(245,158,11,0.2)" strokeWidth="1" />
+                <line x1="288" y1="190" x2="312" y2="250" className="tree-line-slow" stroke="rgba(34,197,94,0.25)" strokeWidth="1" />
+
+                {/* ── Lines: Attestors → Economic ── */}
+                <line x1="72" y1="278" x2="180" y2="330" className="tree-line-slow" stroke="rgba(234,179,8,0.15)" strokeWidth="1" />
+                <line x1="180" y1="278" x2="180" y2="330" className="tree-line-slow" stroke="rgba(234,179,8,0.15)" strokeWidth="1" />
+                <line x1="288" y1="278" x2="180" y2="330" className="tree-line-slow" stroke="rgba(234,179,8,0.15)" strokeWidth="1" />
+
+                {/* ── Lines: Economic → $402/$403 ── */}
+                <line x1="180" y1="360" x2="140" y2="395" className="tree-line-slow" stroke="rgba(234,179,8,0.2)" strokeWidth="1" />
+                <line x1="180" y1="360" x2="220" y2="395" className="tree-line-slow" stroke="rgba(168,85,247,0.2)" strokeWidth="1" />
+
+                {/* ── Root Key node ── */}
+                <rect x="128" y="24" width="104" height="54" rx="8" fill="rgba(34,197,94,0.08)" stroke="rgba(34,197,94,0.6)" strokeWidth="1.5" />
+                <text x="180" y="47" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="11" fontFamily="var(--font-orbitron), monospace" fontWeight="700" letterSpacing="0.1em">ROOT KEY</text>
+                <text x="180" y="64" textAnchor="middle" fill="rgba(161,161,170,0.7)" fontSize="8" fontFamily="monospace" letterSpacing="0.05em">self-signed</text>
+
+                {/* ── Key ops (dashed pills) ── */}
+                <rect x="268" y="36" width="56" height="24" rx="12" fill="none" stroke="rgba(134,239,172,0.25)" strokeWidth="1" strokeDasharray="3 2" />
+                <text x="296" y="52" textAnchor="middle" fill="rgba(134,239,172,0.5)" fontSize="7" fontFamily="monospace">ROTATE</text>
+                <line x1="232" y1="51" x2="268" y2="49" stroke="rgba(134,239,172,0.15)" strokeWidth="1" strokeDasharray="3 3" />
+
+                {/* ── Strand: GitHub ── */}
+                <rect x="28" y="148" width="88" height="46" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.5)" strokeWidth="1" />
+                <text x="72" y="168" textAnchor="middle" fill="rgba(255,255,255,0.85)" fontSize="10" fontFamily="var(--font-orbitron), monospace" fontWeight="700" letterSpacing="0.08em">STRAND</text>
+                <text x="72" y="183" textAnchor="middle" fill="rgba(245,158,11,0.7)" fontSize="8" fontFamily="monospace">GitHub</text>
+
+                {/* ── Strand: Twitter ── */}
+                <rect x="136" y="148" width="88" height="46" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.5)" strokeWidth="1" />
+                <text x="180" y="168" textAnchor="middle" fill="rgba(255,255,255,0.85)" fontSize="10" fontFamily="var(--font-orbitron), monospace" fontWeight="700" letterSpacing="0.08em">STRAND</text>
+                <text x="180" y="183" textAnchor="middle" fill="rgba(245,158,11,0.7)" fontSize="8" fontFamily="monospace">Twitter</text>
+
+                {/* ── Strand: Google ── */}
+                <rect x="244" y="148" width="88" height="46" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.5)" strokeWidth="1" />
+                <text x="288" y="168" textAnchor="middle" fill="rgba(255,255,255,0.85)" fontSize="10" fontFamily="var(--font-orbitron), monospace" fontWeight="700" letterSpacing="0.08em">STRAND</text>
+                <text x="288" y="183" textAnchor="middle" fill="rgba(245,158,11,0.7)" fontSize="8" fontFamily="monospace">Google</text>
+
+                {/* ── Attestors (small pills) ── */}
+                {/* GitHub attestors */}
+                <rect x="18" y="250" width="56" height="24" rx="12" fill="rgba(113,113,122,0.06)" stroke="rgba(113,113,122,0.35)" strokeWidth="1" />
+                <text x="46" y="265" textAnchor="middle" fill="rgba(161,161,170,0.7)" fontSize="8" fontFamily="monospace">b0ase</text>
+                <rect x="78" y="250" width="44" height="24" rx="12" fill="rgba(34,197,94,0.06)" stroke="rgba(34,197,94,0.4)" strokeWidth="1" />
+                <text x="100" y="265" textAnchor="middle" fill="rgba(34,197,94,0.7)" fontSize="8" fontFamily="monospace">self</text>
+
+                {/* Twitter attestors */}
+                <rect x="132" y="250" width="48" height="24" rx="12" fill="rgba(113,113,122,0.06)" stroke="rgba(113,113,122,0.35)" strokeWidth="1" />
+                <text x="156" y="265" textAnchor="middle" fill="rgba(161,161,170,0.7)" fontSize="8" fontFamily="monospace">x.com</text>
+                <rect x="184" y="250" width="44" height="24" rx="12" fill="rgba(34,197,94,0.06)" stroke="rgba(34,197,94,0.4)" strokeWidth="1" />
+                <text x="206" y="265" textAnchor="middle" fill="rgba(34,197,94,0.7)" fontSize="8" fontFamily="monospace">self</text>
+
+                {/* Google attestors */}
+                <rect x="240" y="250" width="56" height="24" rx="12" fill="rgba(113,113,122,0.06)" stroke="rgba(113,113,122,0.35)" strokeWidth="1" />
+                <text x="268" y="265" textAnchor="middle" fill="rgba(161,161,170,0.7)" fontSize="8" fontFamily="monospace">google</text>
+                <rect x="300" y="250" width="44" height="24" rx="12" fill="rgba(34,197,94,0.06)" stroke="rgba(34,197,94,0.4)" strokeWidth="1" />
+                <text x="322" y="265" textAnchor="middle" fill="rgba(34,197,94,0.7)" fontSize="8" fontFamily="monospace">self</text>
+
+                {/* ── Economic layer ── */}
+                <rect x="125" y="322" width="110" height="42" rx="6" fill="rgba(234,179,8,0.05)" stroke="rgba(234,179,8,0.3)" strokeWidth="1" />
+                <text x="180" y="341" textAnchor="middle" fill="rgba(255,255,255,0.75)" fontSize="10" fontFamily="var(--font-orbitron), monospace" fontWeight="700" letterSpacing="0.08em">ECONOMIC</text>
+                <text x="180" y="356" textAnchor="middle" fill="rgba(234,179,8,0.6)" fontSize="8" fontFamily="monospace">layer</text>
+
+                {/* ── $402 ── */}
+                <rect x="104" y="386" width="66" height="30" rx="5" fill="rgba(234,179,8,0.05)" stroke="rgba(234,179,8,0.4)" strokeWidth="1" />
+                <text x="137" y="405" textAnchor="middle" fill="rgba(234,179,8,0.8)" fontSize="10" fontFamily="var(--font-orbitron), monospace" fontWeight="700">$402</text>
+
+                {/* ── $403 ── */}
+                <rect x="190" y="386" width="66" height="30" rx="5" fill="rgba(168,85,247,0.05)" stroke="rgba(168,85,247,0.4)" strokeWidth="1" />
+                <text x="223" y="405" textAnchor="middle" fill="rgba(168,85,247,0.8)" fontSize="10" fontFamily="var(--font-orbitron), monospace" fontWeight="700">$403</text>
+
+                {/* ── Label row labels ── */}
+                <text x="12" y="55" fill="rgba(34,197,94,0.4)" fontSize="7" fontFamily="monospace" fontWeight="700" letterSpacing="0.15em">ROOT</text>
+                <text x="12" y="172" fill="rgba(245,158,11,0.4)" fontSize="7" fontFamily="monospace" fontWeight="700" letterSpacing="0.15em">STRANDS</text>
+                <text x="12" y="265" fill="rgba(113,113,122,0.4)" fontSize="7" fontFamily="monospace" fontWeight="700" letterSpacing="0.12em">ATTESTORS</text>
+                <text x="12" y="346" fill="rgba(234,179,8,0.4)" fontSize="7" fontFamily="monospace" fontWeight="700" letterSpacing="0.15em">ECON</text>
+              </svg>
+              </div>
             </Link>
-            <a
-              href="https://bit-sign.online"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-4 border border-zinc-800 text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-red-500/50 hover:text-red-400 transition-all"
-            >
-              bit-sign.online &rarr;
-            </a>
           </motion.div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-red-500/20 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-green-500/20 to-transparent" />
       </section>
 
       {/* ═══ THE IDEA ═══ */}
@@ -225,7 +342,7 @@ export default function Page401() {
                 <p className="text-zinc-500 text-sm">Payment flows, content access, economic coordination. The money side of the protocol.</p>
               </motion.div>
               <motion.div custom={0.3} variants={fadeUp} className="p-8 md:p-12 flex-1">
-                <div className="text-[9px] text-red-500 font-mono uppercase tracking-[0.2em] mb-4">$401 says</div>
+                <div className="text-[9px] text-green-500 font-mono uppercase tracking-[0.2em] mb-4">$401 says</div>
                 <p className="text-xl font-black tracking-tight mb-2">&ldquo;Follow your own path&rdquo;</p>
                 <p className="text-zinc-500 text-sm">Identity, authorship, reputation, self-sovereignty. The human side of the protocol.</p>
               </motion.div>
@@ -281,7 +398,7 @@ export default function Page401() {
                 } hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors`}
               >
                 <span className={`w-10 h-10 flex items-center justify-center text-xs font-display font-bold shrink-0 ${
-                  item.accent ? 'bg-red-500 text-white' : 'bg-zinc-100 dark:bg-zinc-900'
+                  item.accent ? 'bg-green-500 text-white' : 'bg-zinc-100 dark:bg-zinc-900'
                 }`}>
                   {item.step}
                 </span>
@@ -291,8 +408,8 @@ export default function Page401() {
                 </div>
                 {item.accent && (
                   <span className="relative flex h-2 w-2 self-center">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
                   </span>
                 )}
               </motion.div>
@@ -315,7 +432,7 @@ export default function Page401() {
           <div className="grid md:grid-cols-2 gap-0 border border-zinc-200 dark:border-zinc-800">
             <motion.div custom={0.1} variants={fadeUp} className="p-8 md:p-10 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800">
               <h3 className="text-lg font-display font-black tracking-tight mb-6 uppercase">
-                $401<span className="text-red-300 dark:text-red-800"> Identity</span>
+                $401<span className="text-green-300 dark:text-green-800"> Identity</span>
               </h3>
               <div className="space-y-4">
                 {[
@@ -417,7 +534,7 @@ export default function Page401() {
                 <div className="text-2xl mb-3 opacity-60">{item.icon}</div>
                 <h3 className="text-sm font-black uppercase tracking-wider mb-2">{item.title}</h3>
                 <p className="text-zinc-500 text-sm mb-3">{item.desc}</p>
-                <span className="text-[8px] font-mono text-red-500 uppercase tracking-widest">{item.tag}</span>
+                <span className="text-[8px] font-mono text-green-500 uppercase tracking-widest">{item.tag}</span>
               </motion.div>
             ))}
           </div>
@@ -440,7 +557,7 @@ export default function Page401() {
               <thead>
                 <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
                   <th className="text-left p-4 text-[9px] font-bold uppercase tracking-widest text-zinc-500">Activity</th>
-                  <th className="text-center p-4 text-[9px] font-bold uppercase tracking-widest text-red-500">$401</th>
+                  <th className="text-center p-4 text-[9px] font-bold uppercase tracking-widest text-green-500">$401</th>
                   <th className="text-center p-4 text-[9px] font-bold uppercase tracking-widest text-zinc-500">$402</th>
                 </tr>
               </thead>
@@ -461,7 +578,7 @@ export default function Page401() {
                     className={`${i < 8 ? 'border-b border-zinc-200 dark:border-zinc-800' : ''} hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors`}
                   >
                     <td className="p-4 text-sm">{activity}</td>
-                    <td className={`p-4 text-center text-sm ${needs401 === '\u2713' ? 'text-red-500 font-bold' : needs401 === 'Optional' ? 'text-amber-500' : 'text-zinc-400'}`}>
+                    <td className={`p-4 text-center text-sm ${needs401 === '\u2713' ? 'text-green-500 font-bold' : needs401 === 'Optional' ? 'text-amber-500' : 'text-zinc-400'}`}>
                       {needs401}
                     </td>
                     <td className={`p-4 text-center text-sm ${needs402 === '\u2713' ? 'text-green-500 font-bold' : 'text-zinc-400'}`}>
@@ -492,7 +609,7 @@ export default function Page401() {
             className="text-3xl md:text-5xl font-display font-black tracking-tighter mb-6"
           >
             FOLLOW YOUR<br />
-            <span className="text-red-500">OWN PATH</span>
+            <span className="text-green-500">OWN PATH</span>
           </motion.h2>
           <motion.p
             custom={0.2}
@@ -504,7 +621,7 @@ export default function Page401() {
           <motion.div custom={0.3} variants={fadeUp} className="flex flex-wrap justify-center gap-4">
             <Link
               href="/identity"
-              className="inline-flex items-center gap-3 px-10 py-5 bg-red-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-red-700 transition-colors"
+              className="inline-flex items-center gap-3 px-10 py-5 bg-green-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-green-700 transition-colors"
             >
               Mint $401 Identity
             </Link>
