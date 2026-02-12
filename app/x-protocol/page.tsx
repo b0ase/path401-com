@@ -4,12 +4,18 @@ import { marked } from 'marked';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'The X Protocol — Identity, Payment & Conditions via DNS',
-  description: 'x401/x402/x403 — Three standardised subdomains that give any website identity verification, content payment, and programmable conditions.',
+  title: '$401 — The X Protocol: x401 / x402 / x403',
+  description: 'Three DNS records. Three subdomains. Identity (x401), Payment (x402), and Conditions (x403) for any website on earth. The MX record model applied to the programmable web.',
   openGraph: {
-    title: 'The X Protocol Whitepaper',
-    description: 'Three DNS records. Three subdomains. Identity, payment, and conditions for any website on earth.',
+    title: '$401 — x401 / x402 / x403',
+    description: 'Three DNS records. Three subdomains. Identity, payment, and conditions for any website on earth. The MX record for the programmable web.',
     url: 'https://path401.com/x-protocol',
+    siteName: '$401',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '$401 — x401 / x402 / x403',
+    description: 'Three DNS records. Identity, payment, and conditions for any website on earth.',
   },
 };
 
