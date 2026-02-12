@@ -50,9 +50,8 @@ export default function Page401() {
           loop
           playsInline
           className="absolute top-6 left-6 right-6 bottom-6 w-[calc(100%-48px)] h-[calc(100%-48px)] object-cover opacity-25"
-          style={{ filter: 'hue-rotate(85deg) saturate(1.6) brightness(1.4)' }}
         >
-          <source src="/401-hero.mp4" type="video/mp4" />
+          <source src="/401-GREEN-1.mp4" type="video/mp4" />
         </video>
 
         {/* Dot grid */}
@@ -192,9 +191,9 @@ export default function Page401() {
                 <span className="text-[9px] font-mono font-bold text-green-400/70 uppercase tracking-[0.2em]">$401 Key Chain</span>
                 <div className="flex items-center gap-3">
                   <span className="text-[8px] font-mono text-zinc-600 uppercase tracking-widest">1&cent; per strand</span>
-                  <Link href="/id-tree" className="text-[8px] font-mono text-zinc-600 uppercase tracking-widest hover:text-green-400 transition-colors">
+                  <span className="text-[8px] font-mono text-zinc-600 uppercase tracking-widest">
                     Details &rarr;
-                  </Link>
+                  </span>
                 </div>
               </div>
 
