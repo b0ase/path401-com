@@ -1,692 +1,697 @@
 'use client';
 
-import Link from 'next/link';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import Link from 'next/link';
 
-// ─── Animation variants (match 401 page) ───
-const ease = [0.22, 1, 0.36, 1] as const;
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (delay: number) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.8, delay, ease }
-  })
-};
-
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: (delay: number) => ({
-    opacity: 1,
-    transition: { duration: 0.6, delay }
-  })
-};
-
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: (delay: number) => ({
-    opacity: 1, scale: 1,
-    transition: { duration: 0.7, delay, ease }
-  })
-};
-
-// ─── Node types ───
-type NodeId = 'root' | 'github' | 'twitter' | 'google' | 'att-b0ase' | 'att-self-gh' | 'att-x' | 'att-self-x' | 'att-google' | 'att-self-g' | 'economic' | 'path402' | 'path403' | 'key-rotate' | 'key-revoke';
-
-interface TreeNode {
-  id: NodeId;
+// ─── Tree Node Data ───
+interface IdNode {
+  id: string;
   label: string;
-  sublabel?: string;
-  color: string;
-  borderColor: string;
-  glowColor: string;
-  shape: 'square' | 'pill';
-  size: 'lg' | 'md' | 'sm';
+  sublabel: string;
+  color: string;       // hex
+  icon: string;        // emoji
+  pos: [number, number, number];
+  parentId?: string;
+  detail: { title: string; body: string[] };
 }
 
-const NODES: Record<NodeId, TreeNode> = {
-  root: { id: 'root', label: 'ROOT KEY', sublabel: 'self-signed', color: 'bg-green-500/10', borderColor: 'border-green-500', glowColor: 'shadow-green-500/20', shape: 'square', size: 'lg' },
-  github: { id: 'github', label: 'STRAND', sublabel: 'GitHub', color: 'bg-amber-500/10', borderColor: 'border-amber-500', glowColor: 'shadow-amber-500/20', shape: 'square', size: 'md' },
-  twitter: { id: 'twitter', label: 'STRAND', sublabel: 'Twitter', color: 'bg-amber-500/10', borderColor: 'border-amber-500', glowColor: 'shadow-amber-500/20', shape: 'square', size: 'md' },
-  google: { id: 'google', label: 'STRAND', sublabel: 'Google', color: 'bg-amber-500/10', borderColor: 'border-amber-500', glowColor: 'shadow-amber-500/20', shape: 'square', size: 'md' },
-  'att-b0ase': { id: 'att-b0ase', label: 'b0ase.com', sublabel: 'service', color: 'bg-zinc-500/10', borderColor: 'border-zinc-600', glowColor: 'shadow-zinc-500/10', shape: 'pill', size: 'sm' },
-  'att-self-gh': { id: 'att-self-gh', label: 'self', sublabel: 'attestor', color: 'bg-green-500/10', borderColor: 'border-green-500', glowColor: 'shadow-green-500/20', shape: 'pill', size: 'sm' },
-  'att-x': { id: 'att-x', label: 'x.com', sublabel: 'service', color: 'bg-zinc-500/10', borderColor: 'border-zinc-600', glowColor: 'shadow-zinc-500/10', shape: 'pill', size: 'sm' },
-  'att-self-x': { id: 'att-self-x', label: 'self', sublabel: 'attestor', color: 'bg-green-500/10', borderColor: 'border-green-500', glowColor: 'shadow-green-500/20', shape: 'pill', size: 'sm' },
-  'att-google': { id: 'att-google', label: 'google', sublabel: 'service', color: 'bg-zinc-500/10', borderColor: 'border-zinc-600', glowColor: 'shadow-zinc-500/10', shape: 'pill', size: 'sm' },
-  'att-self-g': { id: 'att-self-g', label: 'self', sublabel: 'attestor', color: 'bg-green-500/10', borderColor: 'border-green-500', glowColor: 'shadow-green-500/20', shape: 'pill', size: 'sm' },
-  economic: { id: 'economic', label: 'ECONOMIC', sublabel: 'layer', color: 'bg-yellow-500/10', borderColor: 'border-yellow-500/60', glowColor: 'shadow-yellow-500/10', shape: 'square', size: 'md' },
-  path402: { id: 'path402', label: '$402', sublabel: 'payment paths', color: 'bg-yellow-500/10', borderColor: 'border-yellow-500', glowColor: 'shadow-yellow-500/20', shape: 'square', size: 'sm' },
-  path403: { id: 'path403', label: '$403', sublabel: 'conditions', color: 'bg-purple-500/10', borderColor: 'border-purple-500', glowColor: 'shadow-purple-500/20', shape: 'square', size: 'sm' },
-  'key-rotate': { id: 'key-rotate', label: 'ROTATE', sublabel: 'key op', color: 'bg-green-500/5', borderColor: 'border-green-300/40', glowColor: 'shadow-green-300/10', shape: 'pill', size: 'sm' },
-  'key-revoke': { id: 'key-revoke', label: 'REVOKE', sublabel: 'key op', color: 'bg-green-500/5', borderColor: 'border-green-300/40', glowColor: 'shadow-green-300/10', shape: 'pill', size: 'sm' },
-};
-
-// ─── Detail content ───
-const DETAILS: Record<NodeId, { title: string; body: string[] }> = {
-  root: {
-    title: 'Root Key — The Anchor',
-    body: [
-      'Your BSV private key. Created at bit-sign.online or any BSV wallet. This is the cryptographic anchor of your entire identity.',
-      'The root key signs everything: strands, attestations, key rotations. Whoever holds this key IS the identity.',
-      'Self-signed means you created it, you control it, no service was involved. This is the strongest form of digital identity.',
-    ],
-  },
-  github: {
-    title: 'GitHub Strand',
-    body: [
-      'Proves you controlled a GitHub account at a point in time. The strand inscribes: provider (github), handle, SHA-256 of the OAuth token, and a timestamp.',
-      'Once inscribed on-chain, it\'s permanent. Even if you lose access to the GitHub account later, the strand proves you had it.',
-      'Multiple attestors can sign the same strand to increase confidence.',
-    ],
-  },
-  twitter: {
-    title: 'Twitter Strand',
-    body: [
-      'Proves you controlled a Twitter/X account at a point in time. Same inscription pattern: provider, handle, OAuth hash, timestamp.',
-      'Twitter strands are especially powerful for reputation — your follower graph becomes a verifiable part of your identity.',
-      'The strand is permanent even if Twitter changes its API or bans your account.',
-    ],
-  },
-  google: {
-    title: 'Google Strand',
-    body: [
-      'Proves you controlled a Google account (email) at a point in time. Useful for professional identity — links to your workspace, calendar, drive.',
-      'Google strands can reference specific permissions you had: admin access, org membership, workspace domain.',
-      'Like all strands, it\'s a snapshot — the proof exists even if Google revokes the OAuth token later.',
-    ],
-  },
-  'att-b0ase': {
-    title: 'Service Attestor: b0ase.com',
-    body: [
-      'b0ase.com acts as an attestation service — it verifies you completed the OAuth flow and signs the strand with its own key.',
-      'This is NOT self-sovereign. b0ase is a trusted third party here. The strand is real, but the signature comes from b0ase\'s key, not yours.',
-      'Stronger: get multiple attestors. Even stronger: self-sign with your own root key (true self-sovereignty).',
-    ],
-  },
-  'att-self-gh': {
-    title: 'Self Attestor',
-    body: [
-      'You sign the strand yourself with your root key. No service involved. This is the strongest form of attestation.',
-      'Self-attestation means: "I personally verified this OAuth flow and I sign it with the same key that anchors my identity."',
-      'Combined with a service attestor, you get both: third-party verification AND personal commitment.',
-    ],
-  },
-  'att-x': {
-    title: 'Service Attestor: x.com',
-    body: [
-      'Twitter/X itself could attest your strand — confirming you completed their OAuth flow.',
-      'Currently b0ase.com acts as the intermediary. In the future, any OAuth provider could sign strands directly.',
-      'The more attestors on a strand, the higher the confidence level.',
-    ],
-  },
-  'att-self-x': {
-    title: 'Self Attestor',
-    body: [
-      'Self-signing your Twitter strand. You vouch for the verification with your root key.',
-      'This is the gold standard — your identity, your verification, your signature.',
-    ],
-  },
-  'att-google': {
-    title: 'Service Attestor: Google',
-    body: [
-      'Google confirming your OAuth verification. Higher trust than a third-party service signing on Google\'s behalf.',
-      'In the $401 model, any service can be an attestor. The protocol is open — attestation is not gated.',
-    ],
-  },
-  'att-self-g': {
-    title: 'Self Attestor',
-    body: [
-      'Self-signing your Google strand. Combined with Google\'s own attestation, this creates maximum confidence.',
-    ],
-  },
-  economic: {
-    title: 'Economic Layer',
-    body: [
-      'Your identity tree connects to the economic protocol. $402 handles payment flows, $403 handles programmable conditions.',
-      'Identity enables economics: your root key has a payTo address, verified strands unlock staking and dividends, identity strength determines access levels.',
-      'Without $401, you can still browse and pay. With $401, you can earn, stake, and own.',
-    ],
-  },
-  path402: {
-    title: '$402 — Payment Paths',
-    body: [
-      'Your root key\'s payTo address is where revenue flows. Verified identity required for staking and dividends.',
-      'Identity strength determines access: more strands = more attestors = higher trust = more economic opportunity.',
-      '$402 tokens (access, content, API) all check your $401 for authorization levels.',
-    ],
-  },
-  path403: {
-    title: '$403 — Conditions Machine',
-    body: [
-      'Programmable rules that reference your identity graph. "Pay only if 3+ strands verified." "Unlock if GitHub attested." "Premium tier if followers > 100."',
-      '$403 is designed but not yet coded. It will be the conditional logic layer that ties identity to smart behaviour.',
-      'Conditions can compose: $401 identity checks + $402 payment checks + arbitrary rules.',
-    ],
-  },
-  'key-rotate': {
-    title: 'Key Rotation',
-    body: [
-      'Delegate your identity to a new key. The old key signs the handover transaction, proving continuity.',
-      'Key rotation is essential for security — if your key is compromised, rotate to a new one without losing your identity.',
-      'The rotation is inscribed on-chain: old key signs "I delegate to new key". New key inherits all strands and attestations.',
-    ],
-  },
-  'key-revoke': {
-    title: 'Key Revocation',
-    body: [
-      'Nuclear option — invalidate the root key entirely. All strands and attestations become orphaned.',
-      'Use only in emergencies: key definitely compromised, no recovery possible.',
-      'Revocation is permanent and irreversible. You would need to create a completely new identity tree.',
-    ],
-  },
-};
-
-// ─── Sovereignty Spectrum ───
-const SPECTRUM = [
+const NODES: IdNode[] = [
+  // Root
   {
-    level: 'Self-Sovereign',
-    desc: 'User signs root with own key',
-    example: 'bit-sign.online',
-    strength: 'STRONGEST',
-    strengthColor: 'text-green-400',
-    barColor: 'bg-green-500',
-    barWidth: 'w-full',
+    id: 'root', label: 'ROOT KEY', sublabel: 'Self-Signed', color: '#22c55e', icon: '🔑',
+    pos: [0, 0, 0],
+    detail: {
+      title: 'Root Key — The Anchor',
+      body: [
+        'Your BSV private key. This is the cryptographic anchor of your entire identity tree.',
+        'Self-signed means you created it, you control it, no service was involved. The strongest form of digital identity.',
+        'Everything branches from this root. Whoever holds this key IS the identity.',
+      ],
+    },
+  },
+  // Key operations
+  {
+    id: 'rotate', label: 'ROTATE', sublabel: 'Key Op', color: '#4ade80', icon: '🔄',
+    pos: [-4, 1, -3], parentId: 'root',
+    detail: {
+      title: 'Key Rotation',
+      body: [
+        'Delegate your identity to a new key. The old key signs the handover, proving continuity.',
+        'Essential for security — if compromised, rotate without losing identity.',
+      ],
+    },
   },
   {
-    level: 'Self-Attested',
-    desc: 'User signs strand with own key',
-    example: 'any BSV wallet',
-    strength: 'STRONG',
-    strengthColor: 'text-green-300',
-    barColor: 'bg-green-400',
-    barWidth: 'w-3/4',
+    id: 'revoke', label: 'REVOKE', sublabel: 'Key Op', color: '#ef4444', icon: '🚫',
+    pos: [4, 1, -3], parentId: 'root',
+    detail: {
+      title: 'Key Revocation',
+      body: [
+        'Nuclear option — invalidate the root key entirely. All strands become orphaned.',
+        'Use only in emergencies. Permanent and irreversible.',
+      ],
+    },
+  },
+  // OAuth Provider Strands (the leaves)
+  {
+    id: 'github', label: 'GitHub', sublabel: 'OAuth Strand', color: '#f0f0f0', icon: '🐙',
+    pos: [-8, 8, 4], parentId: 'root',
+    detail: {
+      title: 'GitHub Identity Strand',
+      body: [
+        'Proves you controlled a GitHub account at a point in time.',
+        'Inscribes: provider, handle, SHA-256 of OAuth token, timestamp.',
+        'Permanent on-chain proof — even if you lose access later.',
+      ],
+    },
   },
   {
-    level: 'Service-Attested',
-    desc: 'Service signs strand with service key',
-    example: 'b0ase.com, x.com',
-    strength: 'MODERATE',
-    strengthColor: 'text-amber-400',
-    barColor: 'bg-amber-500',
-    barWidth: 'w-1/2',
+    id: 'twitter', label: 'Twitter / X', sublabel: 'OAuth Strand', color: '#1d9bf0', icon: '🐦',
+    pos: [0, 10, 6], parentId: 'root',
+    detail: {
+      title: 'Twitter Identity Strand',
+      body: [
+        'Proves you controlled a Twitter/X account.',
+        'Your follower graph becomes verifiable identity.',
+        'Permanent even if Twitter bans your account.',
+      ],
+    },
   },
   {
-    level: 'Custodial',
-    desc: 'Service signs root with service key',
-    example: 'hosted wallets',
-    strength: 'WEAKEST',
-    strengthColor: 'text-green-400',
-    barColor: 'bg-green-500',
-    barWidth: 'w-1/4',
+    id: 'google', label: 'Google', sublabel: 'OAuth Strand', color: '#ea4335', icon: '📧',
+    pos: [8, 8, 4], parentId: 'root',
+    detail: {
+      title: 'Google Identity Strand',
+      body: [
+        'Proves you controlled a Google account (email).',
+        'Links to workspace, calendar, drive permissions.',
+        'Snapshot proof — exists even if OAuth token revoked.',
+      ],
+    },
+  },
+  {
+    id: 'apple', label: 'Apple', sublabel: 'OAuth Strand', color: '#a3a3a3', icon: '🍎',
+    pos: [-6, 9, -5], parentId: 'root',
+    detail: {
+      title: 'Apple Identity Strand',
+      body: [
+        'Proves you controlled an Apple ID.',
+        'Links to App Store, iCloud, developer program.',
+        'Privacy-preserving: Apple hides email by default.',
+      ],
+    },
+  },
+  {
+    id: 'microsoft', label: 'Microsoft', sublabel: 'OAuth Strand', color: '#00a4ef', icon: '🪟',
+    pos: [6, 9, -5], parentId: 'root',
+    detail: {
+      title: 'Microsoft Identity Strand',
+      body: [
+        'Proves you controlled a Microsoft account.',
+        'Links to Azure, Office 365, enterprise identity.',
+        'Bridges corporate and personal identity.',
+      ],
+    },
+  },
+  {
+    id: 'discord', label: 'Discord', sublabel: 'OAuth Strand', color: '#5865f2', icon: '💬',
+    pos: [-10, 6, 0], parentId: 'root',
+    detail: {
+      title: 'Discord Identity Strand',
+      body: [
+        'Proves you controlled a Discord account.',
+        'Server memberships, roles, and community presence.',
+        'Bridges gaming and community identity.',
+      ],
+    },
+  },
+  {
+    id: 'linkedin', label: 'LinkedIn', sublabel: 'OAuth Strand', color: '#0a66c2', icon: '💼',
+    pos: [10, 6, 0], parentId: 'root',
+    detail: {
+      title: 'LinkedIn Identity Strand',
+      body: [
+        'Proves you controlled a LinkedIn account.',
+        'Professional network, employment history, credentials.',
+        'The strongest professional identity strand.',
+      ],
+    },
+  },
+  {
+    id: 'facebook', label: 'Facebook', sublabel: 'OAuth Strand', color: '#1877f2', icon: '👤',
+    pos: [-4, 7, 8], parentId: 'root',
+    detail: {
+      title: 'Facebook Identity Strand',
+      body: [
+        'Proves you controlled a Facebook account.',
+        'Social graph, pages, groups, marketplace activity.',
+        'Bridges social and commercial identity.',
+      ],
+    },
+  },
+  {
+    id: 'spotify', label: 'Spotify', sublabel: 'OAuth Strand', color: '#1db954', icon: '🎵',
+    pos: [4, 7, 8], parentId: 'root',
+    detail: {
+      title: 'Spotify Identity Strand',
+      body: [
+        'Proves you controlled a Spotify account.',
+        'Playlists, listening history, artist connections.',
+        'Cultural identity through music taste.',
+      ],
+    },
+  },
+  {
+    id: 'twitch', label: 'Twitch', sublabel: 'OAuth Strand', color: '#9146ff', icon: '🎮',
+    pos: [0, 5, -7], parentId: 'root',
+    detail: {
+      title: 'Twitch Identity Strand',
+      body: [
+        'Proves you controlled a Twitch account.',
+        'Streaming history, subscriber count, community.',
+        'Bridges creator and entertainment identity.',
+      ],
+    },
+  },
+  // Economic layer
+  {
+    id: 'economic', label: '$402', sublabel: 'Payment Layer', color: '#eab308', icon: '💰',
+    pos: [-3, -5, 2], parentId: 'root',
+    detail: {
+      title: '$402 — Payment Paths',
+      body: [
+        'Your root key has a payTo address — revenue flows here.',
+        'Verified identity required for staking and dividends.',
+        'More strands = higher trust = more economic opportunity.',
+      ],
+    },
+  },
+  {
+    id: 'conditions', label: '$403', sublabel: 'Conditions', color: '#a855f7', icon: '⚙️',
+    pos: [3, -5, 2], parentId: 'root',
+    detail: {
+      title: '$403 — Conditions Machine',
+      body: [
+        'Programmable rules that reference your identity graph.',
+        '"Pay only if 3+ strands verified." "Premium if followers > 100."',
+        'Designed but not yet coded.',
+      ],
+    },
   },
 ];
 
-// ─── Node component ───
-function Node({ node, onClick, isSelected }: { node: TreeNode; onClick: () => void; isSelected: boolean }) {
-  const sizeClasses = {
-    lg: 'w-28 h-16 md:w-40 md:h-24',
-    md: 'w-24 h-14 md:w-32 md:h-20',
-    sm: 'w-20 h-11 md:w-24 md:h-14',
-  };
-  const shape = node.shape === 'pill' ? 'rounded-full' : 'rounded-lg';
-  const dashed = node.id === 'key-rotate' || node.id === 'key-revoke' ? 'border-dashed' : '';
+// ─── Layout Modes ───
+type LayoutMode = 'tree' | 'sphere' | 'helix' | 'flat' | 'explode';
 
-  return (
-    <motion.button
-      onClick={onClick}
-      whileHover={{ scale: 1.06 }}
-      whileTap={{ scale: 0.97 }}
-      className={`
-        ${sizeClasses[node.size]} ${shape} ${node.color} ${dashed}
-        border ${node.borderColor}
-        flex flex-col items-center justify-center gap-0.5
-        cursor-pointer transition-shadow duration-300 shrink-0
-        ${isSelected ? `shadow-lg ${node.glowColor} ring-1 ring-white/20` : 'hover:shadow-md'}
-      `}
-    >
-      <span className="text-[9px] md:text-[10px] font-display font-bold tracking-wider uppercase text-white/90">
-        {node.label}
-      </span>
-      {node.sublabel && (
-        <span className="text-[7px] md:text-[8px] font-mono text-zinc-500 uppercase tracking-widest">
-          {node.sublabel}
-        </span>
-      )}
-    </motion.button>
-  );
+function computePositions(mode: LayoutMode, nodes: IdNode[]): Map<string, THREE.Vector3> {
+  const out = new Map<string, THREE.Vector3>();
+
+  if (mode === 'tree') {
+    nodes.forEach(n => out.set(n.id, new THREE.Vector3(...n.pos)));
+  } else if (mode === 'sphere') {
+    const radius = 12;
+    nodes.forEach((n, i) => {
+      const t = i / nodes.length;
+      const phi = Math.acos(1 - 2 * t);
+      const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+      out.set(n.id, new THREE.Vector3(
+        radius * Math.sin(phi) * Math.cos(theta),
+        radius * Math.cos(phi),
+        radius * Math.sin(phi) * Math.sin(theta)
+      ));
+    });
+  } else if (mode === 'helix') {
+    const radius = 8;
+    const height = 30;
+    nodes.forEach((n, i) => {
+      const t = i / (nodes.length - 1);
+      const angle = t * Math.PI * 2 * 3;
+      out.set(n.id, new THREE.Vector3(
+        radius * Math.cos(angle),
+        (t - 0.5) * height,
+        radius * Math.sin(angle)
+      ));
+    });
+  } else if (mode === 'flat') {
+    const cols = Math.ceil(Math.sqrt(nodes.length));
+    nodes.forEach((n, i) => {
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+      out.set(n.id, new THREE.Vector3(
+        (col - cols / 2) * 5,
+        0,
+        (row - cols / 2) * 5
+      ));
+    });
+  } else if (mode === 'explode') {
+    nodes.forEach(n => {
+      const base = new THREE.Vector3(...n.pos);
+      if (n.id === 'root') {
+        out.set(n.id, base);
+      } else {
+        const dir = base.clone().normalize();
+        out.set(n.id, base.clone().add(dir.multiplyScalar(8)));
+      }
+    });
+  }
+
+  return out;
 }
 
-// ─── Vertical connector (CSS line) ───
-function VLine({ color = 'bg-green-500/20', height = 'h-8' }: { color?: string; height?: string }) {
-  return <div className={`w-px ${height} ${color} mx-auto relative overflow-hidden`}>
-    <div className="absolute inset-0 w-full animate-pulse opacity-60" style={{ background: 'linear-gradient(to bottom, transparent, currentColor, transparent)', animationDuration: '3s' }} />
-  </div>;
-}
+// ─── Component ───
+export default function IdTree3DPage() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [layout, setLayout] = useState<LayoutMode>('tree');
+  const [autoRotate, setAutoRotate] = useState(true);
+  const [particlesOn, setParticlesOn] = useState(true);
+  const [glowPulse, setGlowPulse] = useState(true);
 
-// ─── Branch connector (splits 1 → N) ───
-function Branch({ color = 'border-green-500/20', count = 3 }: { color?: string; count?: number }) {
-  return (
-    <div className="flex items-start justify-center">
-      <div className={`flex border-b ${color}`} style={{ width: count > 2 ? '60%' : '30%' }}>
-        {Array.from({ length: count }).map((_, i) => (
-          <div key={i} className={`flex-1 border-l ${i === count - 1 ? `border-r ${color}` : ''} ${color} h-4`} />
-        ))}
-      </div>
-    </div>
-  );
-}
+  const layoutRef = useRef<LayoutMode>('tree');
+  const autoRotateRef = useRef(true);
+  const particlesRef = useRef(true);
+  const glowPulseRef = useRef(true);
 
-// ─── Merge connector (N → 1) ───
-function Merge({ color = 'border-yellow-500/20', count = 3 }: { color?: string; count?: number }) {
-  return (
-    <div className="flex items-end justify-center">
-      <div className={`flex border-t ${color}`} style={{ width: count > 2 ? '60%' : '30%' }}>
-        {Array.from({ length: count }).map((_, i) => (
-          <div key={i} className={`flex-1 border-l ${i === count - 1 ? `border-r ${color}` : ''} ${color} h-4`} />
-        ))}
-      </div>
-    </div>
-  );
-}
+  useEffect(() => { layoutRef.current = layout; }, [layout]);
+  useEffect(() => { autoRotateRef.current = autoRotate; }, [autoRotate]);
+  useEffect(() => { particlesRef.current = particlesOn; }, [particlesOn]);
+  useEffect(() => { glowPulseRef.current = glowPulse; }, [glowPulse]);
 
-export default function IdTreePage() {
-  const [selected, setSelected] = useState<NodeId | null>(null);
+  const selectedRef = useRef<string | null>(null);
+  useEffect(() => { selectedRef.current = selected; }, [selected]);
 
-  const toggle = (id: NodeId) => setSelected(prev => prev === id ? null : id);
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const container = containerRef.current;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
 
-  return (
-    <div className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-white">
+    // Pre-compute all layout positions
+    const layouts: Record<LayoutMode, Map<string, THREE.Vector3>> = {
+      tree: computePositions('tree', NODES),
+      sphere: computePositions('sphere', NODES),
+      helix: computePositions('helix', NODES),
+      flat: computePositions('flat', NODES),
+      explode: computePositions('explode', NODES),
+    };
 
-      {/* ═══ HERO ═══ */}
-      <section className="relative min-h-[50vh] flex flex-col justify-center overflow-hidden bg-black">
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, rgba(34, 197, 94, 0.8) 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-          }}
-        />
-        <div className="absolute inset-0 pointer-events-none">
-          <div
-            className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[700px]"
-            style={{
-              background: 'radial-gradient(ellipse at center, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.02) 35%, transparent 70%)',
-            }}
-          />
-        </div>
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%)',
-          }}
-        />
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-6 left-6 w-12 h-12 border-l-2 border-t-2 border-green-500/10" />
-          <div className="absolute top-6 right-6 w-12 h-12 border-r-2 border-t-2 border-green-500/10" />
-          <div className="absolute bottom-6 left-6 w-12 h-12 border-l-2 border-b-2 border-green-500/10" />
-          <div className="absolute bottom-6 right-6 w-12 h-12 border-r-2 border-b-2 border-green-500/10" />
-          <div className="absolute top-8 left-20 text-[7px] font-mono text-zinc-700 tracking-[0.25em]">
-            $401 IDENTITY TREE
+    // Scene setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+
+    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 500);
+    camera.position.set(0, 12, 28);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(width, height);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    container.appendChild(labelRenderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.04;
+    controls.minDistance = 10;
+    controls.maxDistance = 80;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.4;
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    const pointLight = new THREE.PointLight(0x22c55e, 2, 50);
+    pointLight.position.set(0, 15, 10);
+    scene.add(pointLight);
+
+    // --- Ground ring (subtle) ---
+    const ringGeom = new THREE.RingGeometry(14, 14.1, 64);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x22c55e, transparent: true, opacity: 0.08, side: THREE.DoubleSide });
+    const ring = new THREE.Mesh(ringGeom, ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = -0.5;
+    scene.add(ring);
+
+    // --- Particles ---
+    const particleCount = 300;
+    const pGeom = new THREE.BufferGeometry();
+    const pPositions = new Float32Array(particleCount * 3);
+    const pSpeeds = new Float32Array(particleCount);
+    for (let i = 0; i < particleCount; i++) {
+      pPositions[i * 3] = (Math.random() - 0.5) * 40;
+      pPositions[i * 3 + 1] = Math.random() * 30 - 5;
+      pPositions[i * 3 + 2] = (Math.random() - 0.5) * 40;
+      pSpeeds[i] = 0.01 + Math.random() * 0.03;
+    }
+    pGeom.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+    const pMat = new THREE.PointsMaterial({ color: 0x22c55e, size: 0.08, transparent: true, opacity: 0.3 });
+    const particles = new THREE.Points(pGeom, pMat);
+    scene.add(particles);
+
+    // --- Nodes ---
+    interface NodeRef {
+      id: string;
+      sphere: THREE.Mesh;
+      glowSphere: THREE.Mesh;
+      label: CSS2DObject;
+      cur: THREE.Vector3;
+      color: string;
+    }
+    const nodeRefs: NodeRef[] = [];
+
+    NODES.forEach(node => {
+      const initPos = layouts.tree.get(node.id)!;
+      const cur = initPos.clone();
+
+      // Main sphere
+      const isRoot = node.id === 'root';
+      const radius = isRoot ? 0.8 : node.parentId === 'root' && !['rotate', 'revoke', 'economic', 'conditions'].includes(node.id) ? 0.5 : 0.35;
+      const sphereGeom = new THREE.SphereGeometry(radius, 24, 24);
+      const sphereMat = new THREE.MeshStandardMaterial({
+        color: node.color,
+        emissive: node.color,
+        emissiveIntensity: 0.4,
+        roughness: 0.3,
+        metalness: 0.6,
+      });
+      const sphere = new THREE.Mesh(sphereGeom, sphereMat);
+      sphere.position.copy(cur);
+      scene.add(sphere);
+
+      // Glow sphere (larger, transparent)
+      const glowGeom = new THREE.SphereGeometry(radius * 2.5, 16, 16);
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: node.color,
+        transparent: true,
+        opacity: 0.06,
+      });
+      const glowSphere = new THREE.Mesh(glowGeom, glowMat);
+      glowSphere.position.copy(cur);
+      scene.add(glowSphere);
+
+      // Label
+      const div = document.createElement('div');
+      const isOAuth = node.sublabel === 'OAuth Strand';
+      div.innerHTML = `
+        <div style="display:flex;align-items:center;gap:6px;padding:5px 12px 5px 8px;background:rgba(0,0,0,0.85);border:1px solid ${node.color}40;border-radius:9999px;cursor:pointer;transition:all 0.2s;backdrop-filter:blur(4px);">
+          <span style="font-size:${isOAuth ? '16px' : '13px'};">${node.icon}</span>
+          <div style="display:flex;flex-direction:column;">
+            <span style="color:${node.color};font-size:${isRoot ? '13px' : '11px'};font-family:ui-monospace,monospace;font-weight:${isRoot ? '800' : '600'};white-space:nowrap;">${node.label}</span>
+            <span style="color:rgba(255,255,255,0.35);font-size:8px;font-family:ui-monospace,monospace;letter-spacing:0.1em;">${node.sublabel}</span>
           </div>
-          <div className="absolute bottom-8 left-20 text-[7px] font-mono text-zinc-700 tracking-[0.25em]">
-            SELF-SOVEREIGN IDENTITY SCHEMA
+        </div>
+      `;
+      div.style.pointerEvents = 'auto';
+      div.onmouseenter = () => {
+        const inner = div.firstElementChild as HTMLElement;
+        if (inner) { inner.style.borderColor = node.color; inner.style.background = `rgba(0,0,0,0.95)`; }
+      };
+      div.onmouseleave = () => {
+        const inner = div.firstElementChild as HTMLElement;
+        if (inner) { inner.style.borderColor = `${node.color}40`; inner.style.background = 'rgba(0,0,0,0.85)'; }
+      };
+      div.onclick = () => {
+        setSelected(prev => prev === node.id ? null : node.id);
+      };
+
+      const label = new CSS2DObject(div);
+      label.position.copy(cur);
+      label.position.y += radius + 0.8;
+      scene.add(label);
+
+      nodeRefs.push({ id: node.id, sphere, glowSphere, label, cur, color: node.color });
+    });
+
+    // --- Connection lines (branches) ---
+    interface BranchRef { line: THREE.Line; parentId: string; childId: string }
+    const branches: BranchRef[] = [];
+
+    NODES.filter(n => n.parentId).forEach(node => {
+      const geom = new THREE.BufferGeometry();
+      const positions = new Float32Array(6);
+      geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const mat = new THREE.LineBasicMaterial({
+        color: node.color,
+        transparent: true,
+        opacity: 0.25,
+      });
+      const line = new THREE.Line(geom, mat);
+      scene.add(line);
+      branches.push({ line, parentId: node.parentId!, childId: node.id });
+    });
+
+    // --- Animation ---
+    let curLayout: LayoutMode = 'tree';
+    let animationId: number;
+    let time = 0;
+
+    const animate = () => {
+      animationId = requestAnimationFrame(animate);
+      time += 0.016;
+
+      if (layoutRef.current !== curLayout) curLayout = layoutRef.current;
+
+      const tgtMap = layouts[curLayout];
+
+      // Lerp nodes
+      nodeRefs.forEach((n, i) => {
+        const t = tgtMap.get(n.id);
+        if (t) {
+          n.cur.lerp(t, 0.04);
+          n.sphere.position.copy(n.cur);
+          n.glowSphere.position.copy(n.cur);
+          n.label.position.copy(n.cur);
+
+          const node = NODES.find(nd => nd.id === n.id)!;
+          const isRoot = n.id === 'root';
+          const radius = isRoot ? 0.8 : 0.5;
+          n.label.position.y = n.cur.y + radius + 0.8;
+
+          // Pulse glow
+          if (glowPulseRef.current) {
+            const pulse = 0.06 + Math.sin(time * 1.5 + i * 0.7) * 0.03;
+            (n.glowSphere.material as THREE.MeshBasicMaterial).opacity = pulse;
+            const s = 1 + Math.sin(time * 2 + i * 0.5) * 0.1;
+            n.glowSphere.scale.setScalar(s);
+          } else {
+            (n.glowSphere.material as THREE.MeshBasicMaterial).opacity = 0.06;
+            n.glowSphere.scale.setScalar(1);
+          }
+
+          // Highlight selected
+          const isSelected = selectedRef.current === n.id;
+          (n.sphere.material as THREE.MeshStandardMaterial).emissiveIntensity = isSelected ? 1.0 : 0.4;
+        }
+      });
+
+      // Update branch lines
+      branches.forEach(b => {
+        const parent = nodeRefs.find(n => n.id === b.parentId);
+        const child = nodeRefs.find(n => n.id === b.childId);
+        if (parent && child) {
+          const positions = b.line.geometry.attributes.position as THREE.BufferAttribute;
+          positions.array[0] = parent.cur.x;
+          positions.array[1] = parent.cur.y;
+          positions.array[2] = parent.cur.z;
+          positions.array[3] = child.cur.x;
+          positions.array[4] = child.cur.y;
+          positions.array[5] = child.cur.z;
+          positions.needsUpdate = true;
+        }
+      });
+
+      // Particles
+      pMat.opacity = particlesRef.current ? 0.3 : 0;
+      if (particlesRef.current) {
+        const pp = pGeom.attributes.position as THREE.BufferAttribute;
+        for (let i = 0; i < particleCount; i++) {
+          pp.array[i * 3 + 1] += pSpeeds[i];
+          if (pp.array[i * 3 + 1] > 25) pp.array[i * 3 + 1] = -5;
+        }
+        pp.needsUpdate = true;
+      }
+
+      // Rotate
+      controls.autoRotate = autoRotateRef.current;
+
+      controls.update();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    };
+    animate();
+
+    const onResize = () => {
+      const w = container.clientWidth, h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      labelRenderer.setSize(w, h);
+    };
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', onResize);
+      renderer.dispose();
+      container.removeChild(renderer.domElement);
+      container.removeChild(labelRenderer.domElement);
+    };
+  }, []);
+
+  const selectedNode = NODES.find(n => n.id === selected);
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      {/* Header */}
+      <div className="border-b border-zinc-900 px-6 md:px-8 pt-28 pb-6">
+        <div className="flex items-end gap-4">
+          <span className="text-4xl">🌳</span>
+          <h1 className="text-4xl md:text-6xl font-bold text-white leading-none tracking-tighter">
+            ID <span className="text-green-500">TREE</span>
+          </h1>
+          <div className="text-xs text-zinc-500 mb-2 font-mono uppercase tracking-widest">
+            $401 IDENTITY
           </div>
         </div>
+        <p className="text-zinc-500 text-sm font-mono mt-3 max-w-xl">
+          Your identity is a tree. The root is yours. OAuth providers are leaves. Everything branches from your key.
+        </p>
+      </div>
 
-        <div className="relative z-10 px-6 md:px-16 max-w-[1920px] mx-auto w-full">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1, ease }}
-            className="flex items-center gap-3 mb-6"
+      {/* Shape buttons */}
+      <div className="border-b border-zinc-900 px-6 md:px-8 py-3 flex flex-wrap items-center gap-2">
+        {([
+          ['tree', '🌳 Tree'],
+          ['sphere', '🌐 Sphere'],
+          ['helix', '🧬 Helix'],
+          ['flat', '▦ Grid'],
+          ['explode', '💥 Explode'],
+        ] as [LayoutMode, string][]).map(([mode, label]) => (
+          <button
+            key={mode}
+            onClick={() => setLayout(mode)}
+            className={`px-3 py-1.5 text-xs font-mono rounded transition-colors ${
+              layout === mode ? 'bg-green-500 text-black' : 'bg-black text-white border border-white/20 hover:border-green-500/40'
+            }`}
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-            </span>
-            <span className="text-zinc-600 text-[10px] tracking-[0.3em] uppercase font-mono font-bold">
-              $401 : IDENTITY PROTOCOL &mdash; VISUAL EXPLORER
-            </span>
-          </motion.div>
+            {label}
+          </button>
+        ))}
 
-          <motion.h1
-            initial={{ opacity: 0, y: 60 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease }}
-            className="font-display font-black tracking-tighter leading-[0.85] mb-2"
-            style={{
-              fontSize: 'clamp(3rem, 10vw, 10rem)',
-              textShadow: '0 0 10px rgba(34, 197, 94, 0.4), 0 0 30px rgba(34, 197, 94, 0.2), 0 0 60px rgba(34, 197, 94, 0.1)',
-            }}
-          >
-            <span className="text-white">ID TREE</span>
-          </motion.h1>
+        <div className="w-px h-6 bg-zinc-800 mx-2" />
 
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-zinc-500 max-w-xl text-sm leading-relaxed mb-8 font-mono"
-          >
-            Your identity is a tree. The root is yours. Everything else branches from it.
-          </motion.p>
+        <button
+          onClick={() => setAutoRotate(r => !r)}
+          className={`px-3 py-1.5 text-xs font-mono rounded transition-colors ${
+            autoRotate ? 'bg-green-500/20 text-green-400 border border-green-500/40' : 'bg-black text-white border border-white/20 hover:border-white/40'
+          }`}
+        >
+          ↻ Spin
+        </button>
+        <button
+          onClick={() => setGlowPulse(g => !g)}
+          className={`px-3 py-1.5 text-xs font-mono rounded transition-colors ${
+            glowPulse ? 'bg-green-500/20 text-green-400 border border-green-500/40' : 'bg-black text-white border border-white/20 hover:border-white/40'
+          }`}
+        >
+          ✦ Glow
+        </button>
+        <button
+          onClick={() => setParticlesOn(p => !p)}
+          className={`px-3 py-1.5 text-xs font-mono rounded transition-colors ${
+            particlesOn ? 'bg-green-500/20 text-green-400 border border-green-500/40' : 'bg-black text-white border border-white/20 hover:border-white/40'
+          }`}
+        >
+          ⋮ Particles
+        </button>
+      </div>
+
+      {/* 3D Scene */}
+      <div className="relative" style={{ height: 'calc(100vh - 260px)', minHeight: '500px' }}>
+        <div ref={containerRef} className="w-full h-full" style={{ cursor: 'grab' }} />
+
+        {/* Legend */}
+        <div className="absolute bottom-4 right-4 z-10 flex flex-col gap-2 text-[10px] bg-black/70 backdrop-blur p-3 rounded-lg border border-white/10">
+          <div className="flex gap-3">
+            <span className="flex items-center gap-1.5 text-green-400"><span className="w-2 h-2 rounded-full bg-green-500" />Root</span>
+            <span className="flex items-center gap-1.5 text-white"><span className="w-2 h-2 rounded-full bg-white" />OAuth</span>
+            <span className="flex items-center gap-1.5 text-yellow-400"><span className="w-2 h-2 rounded-full bg-yellow-500" />Economic</span>
+          </div>
+          <div className="text-zinc-600 font-mono">Click any node to explore</div>
         </div>
+      </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-green-500/20 to-transparent" />
-      </section>
-
-      {/* ═══ INTERACTIVE TREE ═══ */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        className="border-b border-zinc-200 dark:border-zinc-900"
-      >
-        <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
-          <motion.div custom={0} variants={fadeIn} className="section-label">
-            Identity Schema
-          </motion.div>
-
+      {/* Detail panel */}
+      <AnimatePresence mode="wait">
+        {selectedNode && (
           <motion.div
-            custom={0.1}
-            variants={scaleIn}
-            className="relative border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 overflow-hidden"
+            key={selectedNode.id}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden border-t border-zinc-900"
           >
-            {/* Background grid */}
-            <div
-              className="absolute inset-0 pointer-events-none opacity-[0.015] dark:opacity-[0.04]"
-              style={{
-                backgroundImage: 'linear-gradient(rgba(128,128,128,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,0.3) 1px, transparent 1px)',
-                backgroundSize: '40px 40px',
-              }}
-            />
-
-            <div className="relative py-10 md:py-14 px-4 md:px-8">
-
-              {/* Row 0: Root Key + Key Operations */}
-              <div className="flex items-center justify-center gap-6 md:gap-10">
-                <Node node={NODES.root} onClick={() => toggle('root')} isSelected={selected === 'root'} />
-                <div className="hidden md:flex items-center gap-2 opacity-60">
-                  <div className="w-8 h-px bg-green-300/20 border-t border-dashed border-green-300/30" />
-                  <Node node={NODES['key-rotate']} onClick={() => toggle('key-rotate')} isSelected={selected === 'key-rotate'} />
-                  <Node node={NODES['key-revoke']} onClick={() => toggle('key-revoke')} isSelected={selected === 'key-revoke'} />
+            <div className="max-w-3xl mx-auto px-6 md:px-8 py-8">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{selectedNode.icon}</span>
+                  <div>
+                    <h3 className="text-lg font-bold tracking-tight">{selectedNode.detail.title}</h3>
+                    <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: selectedNode.color }}>
+                      {selectedNode.sublabel}
+                    </span>
+                  </div>
                 </div>
-              </div>
-
-              {/* Connector: Root → 3 Strands */}
-              <VLine color="bg-green-500/20" height="h-6" />
-              <Branch color="border-green-500/20" count={3} />
-
-              {/* Row 1: Strands */}
-              <div className="flex justify-center gap-6 md:gap-24 lg:gap-32 mt-1">
-                <Node node={NODES.github} onClick={() => toggle('github')} isSelected={selected === 'github'} />
-                <Node node={NODES.twitter} onClick={() => toggle('twitter')} isSelected={selected === 'twitter'} />
-                <Node node={NODES.google} onClick={() => toggle('google')} isSelected={selected === 'google'} />
-              </div>
-
-              {/* Connectors: Strands → Attestors */}
-              <div className="flex justify-center gap-6 md:gap-24 lg:gap-32 mt-1">
-                <div className="w-24 md:w-32"><VLine color="bg-amber-500/20" height="h-5" /></div>
-                <div className="w-24 md:w-32"><VLine color="bg-amber-500/20" height="h-5" /></div>
-                <div className="w-24 md:w-32"><VLine color="bg-amber-500/20" height="h-5" /></div>
-              </div>
-
-              {/* Row 2: Attestors */}
-              <div className="flex justify-center gap-4 md:gap-16 lg:gap-24">
-                <div className="flex gap-1.5 md:gap-2">
-                  <Node node={NODES['att-b0ase']} onClick={() => toggle('att-b0ase')} isSelected={selected === 'att-b0ase'} />
-                  <Node node={NODES['att-self-gh']} onClick={() => toggle('att-self-gh')} isSelected={selected === 'att-self-gh'} />
-                </div>
-                <div className="flex gap-1.5 md:gap-2">
-                  <Node node={NODES['att-x']} onClick={() => toggle('att-x')} isSelected={selected === 'att-x'} />
-                  <Node node={NODES['att-self-x']} onClick={() => toggle('att-self-x')} isSelected={selected === 'att-self-x'} />
-                </div>
-                <div className="flex gap-1.5 md:gap-2">
-                  <Node node={NODES['att-google']} onClick={() => toggle('att-google')} isSelected={selected === 'att-google'} />
-                  <Node node={NODES['att-self-g']} onClick={() => toggle('att-self-g')} isSelected={selected === 'att-self-g'} />
-                </div>
-              </div>
-
-              {/* Connector: Attestors → Economic */}
-              <Merge color="border-yellow-500/20" count={3} />
-              <VLine color="bg-yellow-500/20" height="h-6" />
-
-              {/* Row 3: Economic Layer */}
-              <div className="flex justify-center">
-                <Node node={NODES.economic} onClick={() => toggle('economic')} isSelected={selected === 'economic'} />
-              </div>
-
-              {/* Connector: Economic → $402 + $403 */}
-              <VLine color="bg-yellow-500/15" height="h-5" />
-              <Branch color="border-yellow-500/15" count={2} />
-
-              {/* Row 4: $402 and $403 */}
-              <div className="flex justify-center gap-6 md:gap-10 mt-1">
-                <Node node={NODES.path402} onClick={() => toggle('path402')} isSelected={selected === 'path402'} />
-                <Node node={NODES.path403} onClick={() => toggle('path403')} isSelected={selected === 'path403'} />
-              </div>
-
-              {/* Mobile key ops (shown below tree on small screens) */}
-              <div className="md:hidden mt-6 flex justify-center gap-2">
-                <Node node={NODES['key-rotate']} onClick={() => toggle('key-rotate')} isSelected={selected === 'key-rotate'} />
-                <Node node={NODES['key-revoke']} onClick={() => toggle('key-revoke')} isSelected={selected === 'key-revoke'} />
-              </div>
-
-              {/* Hint */}
-              {!selected && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 2, duration: 0.8 }}
-                  className="text-center mt-8 text-[9px] font-mono text-zinc-600 uppercase tracking-widest"
+                <button
+                  onClick={() => setSelected(null)}
+                  className="text-zinc-500 hover:text-white text-xs font-mono uppercase tracking-widest transition-colors"
                 >
-                  Click any node to explore
-                </motion.div>
-              )}
+                  Close
+                </button>
+              </div>
+              <div className="space-y-3">
+                {selectedNode.detail.body.map((para, i) => (
+                  <p key={i} className="text-zinc-400 text-sm leading-relaxed font-mono">{para}</p>
+                ))}
+              </div>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
 
-          {/* ── Detail Panel ── */}
-          <AnimatePresence mode="wait">
-            {selected && DETAILS[selected] && (
-              <motion.div
-                key={selected}
-                initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
-                exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                transition={{ duration: 0.4, ease }}
-                className="overflow-hidden"
-              >
-                <div className="border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 p-6 md:p-10">
-                  <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-lg font-display font-black tracking-tight uppercase">
-                      {DETAILS[selected].title}
-                    </h3>
-                    <button
-                      onClick={() => setSelected(null)}
-                      className="text-zinc-500 hover:text-white text-xs font-mono uppercase tracking-widest transition-colors"
-                    >
-                      Close
-                    </button>
-                  </div>
-                  <div className="space-y-3">
-                    {DETAILS[selected].body.map((para, i) => (
-                      <p key={i} className="text-zinc-500 text-sm leading-relaxed font-mono">
-                        {para}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </motion.section>
-
-      {/* ═══ SOVEREIGNTY SPECTRUM ═══ */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        className="border-b border-zinc-200 dark:border-zinc-900"
-      >
-        <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
-          <motion.div custom={0} variants={fadeIn} className="section-label">
-            Who Signs What &mdash; The Sovereignty Spectrum
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-zinc-200 dark:border-zinc-800">
-            {SPECTRUM.map((item, i) => (
-              <motion.div
-                key={item.level}
-                custom={0.1 + i * 0.1}
-                variants={fadeUp}
-                className={`p-6 md:p-8 ${
-                  i < 3 ? 'border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800' : ''
-                }`}
-              >
-                <div className={`text-[9px] font-mono font-bold uppercase tracking-widest mb-3 ${item.strengthColor}`}>
-                  {item.strength}
-                </div>
-                <h3 className="text-sm font-black uppercase tracking-wider mb-2">{item.level}</h3>
-                <p className="text-zinc-500 text-xs leading-relaxed mb-3">{item.desc}</p>
-                <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-900 rounded-full overflow-hidden mb-2">
-                  <div className={`h-full ${item.barColor} ${item.barWidth} rounded-full`} />
-                </div>
-                <span className="text-[8px] font-mono text-zinc-600 uppercase tracking-widest">
-                  {item.example}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-
-          <motion.div custom={0.6} variants={fadeIn} className="mt-4 border border-amber-500/20 bg-amber-500/5 p-4">
-            <p className="text-amber-400 text-xs font-mono leading-relaxed">
-              <span className="font-bold uppercase tracking-widest">Honest note:</span> b0ase.com currently operates at the &ldquo;Service-Attested&rdquo; level.
-              We sign strands with our key after verifying your OAuth flow. True self-sovereignty requires you to sign with your own root key via bit-sign.online.
-            </p>
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {/* ═══ $401 → $402 / $403 ═══ */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        className="border-b border-zinc-200 dark:border-zinc-900"
-      >
-        <div className="max-w-[1920px] mx-auto px-6 md:px-16 py-16">
-          <motion.div custom={0} variants={fadeIn} className="section-label">
-            Identity Enables Economics
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-0 border border-zinc-200 dark:border-zinc-800">
-            <motion.div custom={0.1} variants={fadeUp} className="p-8 md:p-10 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800">
-              <h3 className="text-lg font-display font-black tracking-tight mb-1 uppercase">
-                $401 <span className="text-yellow-500">&rarr;</span> $402
-              </h3>
-              <div className="text-[9px] text-yellow-500 font-mono uppercase tracking-[0.2em] mb-6">
-                Identity enables Payment
-              </div>
-              <div className="space-y-4">
-                {[
-                  ['payTo', 'Root key has a payout address — revenue flows here automatically'],
-                  ['Staking', 'Verified identity required for staking $402 tokens and receiving dividends'],
-                  ['Access', 'Identity strength (strand count + attestor count) determines access levels'],
-                  ['Trust', 'More strands = higher trust = more economic opportunity'],
-                ].map(([label, desc]) => (
-                  <div key={label} className="flex gap-4">
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-yellow-500 w-16 shrink-0 pt-0.5">{label}</span>
-                    <span className="text-sm text-zinc-500">{desc}</span>
-                  </div>
-                ))}
-              </div>
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 mt-6 text-xs font-mono font-bold text-yellow-500 uppercase tracking-widest hover:text-yellow-400 transition-colors"
-              >
-                path402.com &rarr;
-              </Link>
-            </motion.div>
-
-            <motion.div custom={0.2} variants={fadeUp} className="p-8 md:p-10">
-              <h3 className="text-lg font-display font-black tracking-tight mb-1 uppercase">
-                $401 <span className="text-purple-500">&rarr;</span> $403
-              </h3>
-              <div className="text-[9px] text-purple-500 font-mono uppercase tracking-[0.2em] mb-6">
-                Identity enables Conditions
-              </div>
-              <div className="space-y-4">
-                {[
-                  ['Rules', 'Conditions reference identity strands: "pay only if 3+ strands verified"'],
-                  ['Gates', '"Unlock if GitHub attested" — programmable access based on identity graph'],
-                  ['Tiers', '"Premium tier if followers > 100" — social proof as access control'],
-                  ['Compose', '$401 identity + $402 payment + arbitrary rules = smart behaviour'],
-                ].map(([label, desc]) => (
-                  <div key={label} className="flex gap-4">
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-purple-500 w-16 shrink-0 pt-0.5">{label}</span>
-                    <span className="text-sm text-zinc-500">{desc}</span>
-                  </div>
-                ))}
-              </div>
-              <span className="inline-flex items-center gap-2 mt-6 text-xs font-mono font-bold text-zinc-600 uppercase tracking-widest">
-                path403.com &mdash; designed, not yet built
-              </span>
-            </motion.div>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* ═══ CTA ═══ */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        className="py-24"
-      >
-        <div className="max-w-[1920px] mx-auto px-6 md:px-16 text-center">
-          <motion.h2
-            custom={0.1}
-            variants={fadeUp}
-            className="text-3xl md:text-5xl font-display font-black tracking-tighter mb-6"
+      {/* CTA */}
+      <div className="border-t border-zinc-900 py-16 text-center">
+        <h2 className="text-2xl md:text-4xl font-bold tracking-tighter mb-4">
+          YOUR IDENTITY. <span className="text-green-500">YOUR TREE.</span>
+        </h2>
+        <p className="text-zinc-500 text-sm font-mono mb-8">
+          Create your root. Inscribe your strands. Own your name.
+        </p>
+        <div className="flex flex-wrap justify-center gap-4">
+          <a
+            href="https://bit-sign.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-8 py-4 bg-green-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-green-700 transition-colors"
           >
-            YOUR IDENTITY<br />
-            <span className="text-green-500">YOUR TREE</span>
-          </motion.h2>
-          <motion.p
-            custom={0.2}
-            variants={fadeIn}
-            className="text-zinc-500 mb-10 text-sm font-mono"
+            Create Your Root
+          </a>
+          <Link
+            href="/identity"
+            className="px-8 py-4 border border-zinc-800 text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-green-500/50 hover:text-green-400 transition-colors"
           >
-            Create your root. Inscribe your strands. Own your name.
-          </motion.p>
-          <motion.div custom={0.3} variants={fadeUp} className="flex flex-wrap justify-center gap-4">
-            <a
-              href="https://bit-sign.online"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-10 py-5 bg-green-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-green-700 transition-colors"
-            >
-              Create Your Root
-            </a>
-            <Link
-              href="/identity"
-              className="inline-flex items-center gap-3 px-10 py-5 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-green-500/50 hover:text-green-400 transition-colors"
-            >
-              Inscribe a Strand
-            </Link>
-            <Link
-              href="/401"
-              className="inline-flex items-center gap-2 px-10 py-5 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold uppercase tracking-widest text-xs hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-zinc-900 dark:hover:text-white transition-colors"
-            >
-              Read the Spec &rarr;
-            </Link>
-          </motion.div>
+            Inscribe a Strand
+          </Link>
         </div>
-      </motion.section>
+      </div>
     </div>
   );
 }
