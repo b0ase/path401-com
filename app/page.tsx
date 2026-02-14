@@ -148,9 +148,10 @@ function BootSequenceHero() {
         muted
         loop
         playsInline
-        className="absolute inset-0 w-full h-full object-cover opacity-20 z-0"
+        className="absolute inset-0 w-full h-full object-cover opacity-40 z-0"
+        style={{ filter: 'brightness(1.3)' }}
       >
-        <source src="/402-hero.mp4" type="video/mp4" />
+        <source src="/401-GREEN-1.mp4" type="video/mp4" />
       </video>
 
       {/* ═══════════ BACKGROUND LAYERS ═══════════ */}
@@ -160,7 +161,7 @@ function BootSequenceHero() {
         <div
           className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[800px]"
           style={{
-            background: 'radial-gradient(ellipse at center, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.04) 35%, transparent 70%)',
+            background: 'radial-gradient(ellipse at center, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 35%, transparent 70%)',
           }}
         />
       </div>
