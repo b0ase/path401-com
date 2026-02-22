@@ -39,6 +39,14 @@ export const metadata: Metadata = {
     siteName: "$401 Protocol",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "https://path401.com/401-OG.png",
+        width: 684,
+        height: 466,
+        alt: "$401 — Decentralised Identity Protocol",
+      },
+    ],
     videos: [
       {
         url: "https://path401.com/401-GREEN-1.mp4",
@@ -54,6 +62,7 @@ export const metadata: Metadata = {
     description: "Decentralised identity protocol. Prove who you are without giving yourself away.",
     creator: "@b0ase",
     site: "@b0ase",
+    images: ["https://path401.com/401-OG.png"],
   },
   robots: {
     index: true,
