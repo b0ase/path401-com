@@ -27,22 +27,30 @@ const orbitron = Orbitron({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://path401.com'),
-  title: "$401 — Follow Your Own Path",
+  title: "$401 — Make Your Own Path",
   description: "Decentralised identity protocol. Prove who you are without giving yourself away. Encrypted, self-sovereign, inscribed on-chain forever.",
   keywords: ["$401", "path protocol", "BSV", "identity", "self-sovereign", "cryptographic identity", "HTTP 401", "on-chain identity", "peer underwriting"],
   authors: [{ name: "b0ase", url: "https://x.com/b0ase" }],
   creator: "b0ase",
   openGraph: {
-    title: "$401 — Follow Your Own Path",
+    title: "$401 — Make Your Own Path",
     description: "Decentralised identity protocol. Prove who you are without giving yourself away.",
     url: "https://path401.com",
     siteName: "$401 Protocol",
     locale: "en_US",
     type: "website",
+    videos: [
+      {
+        url: "https://path401.com/401-GREEN-1.mp4",
+        width: 688,
+        height: 464,
+        type: "video/mp4",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "$401 — Follow Your Own Path",
+    title: "$401 — Make Your Own Path",
     description: "Decentralised identity protocol. Prove who you are without giving yourself away.",
     creator: "@b0ase",
     site: "@b0ase",

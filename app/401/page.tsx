@@ -324,7 +324,7 @@ export default function Page401() {
               </motion.div>
               <motion.div custom={0.3} variants={fadeUp} className="p-8 md:p-12 flex-1">
                 <div className="text-[9px] text-green-500 font-mono uppercase tracking-[0.2em] mb-4">$401 says</div>
-                <p className="text-xl font-black tracking-tight mb-2">&ldquo;Follow your own path&rdquo;</p>
+                <p className="text-xl font-black tracking-tight mb-2">&ldquo;Make your own path&rdquo;</p>
                 <p className="text-zinc-500 text-sm">Identity, authorship, reputation, self-sovereignty. The human side of the protocol.</p>
               </motion.div>
             </div>
