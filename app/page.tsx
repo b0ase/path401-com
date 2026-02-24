@@ -1107,10 +1107,13 @@ function DashboardPanel() {
   useEffect(() => {
     Promise.all([
       fetch('/api/client/identity').then(r => r.json()).catch(() => ({})),
-    ]).then(([identityData]) => {
+      fetch('/api/client/strands').then(r => r.ok ? r.json() : null).catch(() => null),
+    ]).then(([identityData, strandsData]: [{ identity?: { symbol: string } }, { count?: number } | null]) => {
       if (identityData?.identity) {
         setIdentitySymbol(identityData.identity.symbol);
-        setStrandCount(identityData.identity.metadata?.strandCount ?? 0);
+      }
+      if (strandsData?.count !== undefined) {
+        setStrandCount(strandsData.count);
       }
     }).finally(() => setLoading(false));
   }, []);

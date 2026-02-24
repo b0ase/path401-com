@@ -6,6 +6,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useWallet } from '@/components/WalletProvider';
 
 // ─── Tree Node Data ───
 interface IdNode {
@@ -264,12 +265,14 @@ function computePositions(mode: LayoutMode, nodes: IdNode[]): Map<string, THREE.
 
 // ─── Component ───
 export default function IdTree3DPage() {
+  const { wallet } = useWallet();
   const containerRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [layout, setLayout] = useState<LayoutMode>('tree');
   const [autoRotate, setAutoRotate] = useState(true);
   const [particlesOn, setParticlesOn] = useState(true);
   const [glowPulse, setGlowPulse] = useState(true);
+  const [realStrands, setRealStrands] = useState<Record<string, { handle: string; status: string; verifiedAt: string }>>({});
 
   const layoutRef = useRef<LayoutMode>('tree');
   const autoRotateRef = useRef(true);
@@ -283,6 +286,46 @@ export default function IdTree3DPage() {
 
   const selectedRef = useRef<string | null>(null);
   useEffect(() => { selectedRef.current = selected; }, [selected]);
+
+  // Fetch real strands when logged in
+  useEffect(() => {
+    if (!wallet.connected) return;
+    fetch('/api/client/strands')
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { strands?: Array<{ provider: string; providerHandle: string; broadcastStatus: string; oauthVerifiedAt: string }> } | null) => {
+        if (data?.strands) {
+          const map: Record<string, { handle: string; status: string; verifiedAt: string }> = {};
+          for (const s of data.strands) {
+            map[s.provider] = {
+              handle: s.providerHandle || s.provider,
+              status: s.broadcastStatus,
+              verifiedAt: s.oauthVerifiedAt,
+            };
+          }
+          setRealStrands(map);
+        }
+      })
+      .catch(() => {});
+  }, [wallet.connected]);
+
+  // Enhance NODES with real strand data
+  const activeNodes = NODES.map(node => {
+    const strand = realStrands[node.id];
+    if (!strand) return node;
+    return {
+      ...node,
+      sublabel: `@${strand.handle}`,
+      detail: {
+        ...node.detail,
+        title: `${node.label} — @${strand.handle}`,
+        body: [
+          `Linked and verified on ${new Date(strand.verifiedAt).toLocaleDateString()}.`,
+          `On-chain status: ${strand.status.toUpperCase()}.`,
+          ...node.detail.body,
+        ],
+      },
+    };
+  });
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -545,7 +588,7 @@ export default function IdTree3DPage() {
     };
   }, []);
 
-  const selectedNode = NODES.find(n => n.id === selected);
+  const selectedNode = activeNodes.find(n => n.id === selected);
 
   return (
     <div className="min-h-screen bg-black text-white">
