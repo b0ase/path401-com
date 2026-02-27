@@ -12,6 +12,8 @@ function getNavItems() {
   if (host.includes('path401')) {
     return [
       { href: '/', label: '$401' },
+      { href: '/identity', label: 'Identity' },
+      { href: '/id-tree', label: 'ID Tree' },
       { href: 'https://path402.com', label: '$402', external: true },
       { href: 'https://path403.com', label: '$403', external: true },
     ];
