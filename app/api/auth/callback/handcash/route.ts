@@ -7,19 +7,19 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const authToken = searchParams.get('authToken');
-    const redirect = searchParams.get('redirect') || '/token';
+    const redirect = searchParams.get('redirect') || '/identity';
 
     const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://path401.com').trim();
     const appId = process.env.HANDCASH_APP_ID?.trim();
     const appSecret = process.env.HANDCASH_APP_SECRET?.trim();
 
     if (!authToken) {
-      return NextResponse.redirect(`${baseUrl}/token?error=no_token`);
+      return NextResponse.redirect(`${baseUrl}/identity?error=no_token`);
     }
 
     if (!appId || !appSecret) {
       console.error('HANDCASH_APP_ID or HANDCASH_APP_SECRET not configured');
-      return NextResponse.redirect(`${baseUrl}/token?error=config_error`);
+      return NextResponse.redirect(`${baseUrl}/identity?error=config_error`);
     }
 
     // Debug: Log credential lengths and first/last chars
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     } catch (profileError: unknown) {
       const errMsg = profileError instanceof Error ? profileError.message : String(profileError);
       console.error('HandCash profile fetch exception:', errMsg);
-      return NextResponse.redirect(`${baseUrl}/token?error=profile_fetch_failed&reason=exception&details=${encodeURIComponent(errMsg)}`);
+      return NextResponse.redirect(`${baseUrl}/identity?error=profile_fetch_failed&reason=exception&details=${encodeURIComponent(errMsg)}`);
     }
 
     if (result.error) {
@@ -67,12 +67,12 @@ export async function GET(request: NextRequest) {
         responseText: result.response?.statusText,
       });
       const errorMsg = encodeURIComponent(typeof result.error === 'string' ? result.error : JSON.stringify(result.error));
-      return NextResponse.redirect(`${baseUrl}/token?error=profile_fetch_failed&reason=api_error&status=${result.response?.status || 'unknown'}&details=${errorMsg}`);
+      return NextResponse.redirect(`${baseUrl}/identity?error=profile_fetch_failed&reason=api_error&status=${result.response?.status || 'unknown'}&details=${errorMsg}`);
     }
 
     if (!result.data) {
       console.error('Failed to fetch HandCash profile - no data:', result);
-      return NextResponse.redirect(`${baseUrl}/token?error=profile_fetch_failed&reason=no_data`);
+      return NextResponse.redirect(`${baseUrl}/identity?error=profile_fetch_failed&reason=no_data`);
     }
 
     const profile = result.data;
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
 
     if (!handle) {
       console.error('No handle in profile:', profile);
-      return NextResponse.redirect(`${baseUrl}/token?error=no_handle`);
+      return NextResponse.redirect(`${baseUrl}/identity?error=no_handle`);
     }
 
     // Register/get the holder
@@ -114,6 +114,6 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('HandCash callback error:', error);
     const errorUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://path401.com').trim();
-    return NextResponse.redirect(`${errorUrl}/token?error=callback_failed`);
+    return NextResponse.redirect(`${errorUrl}/identity?error=callback_failed`);
   }
 }
