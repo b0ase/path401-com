@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const authToken = searchParams.get('authToken');
     const redirect = searchParams.get('redirect') || '/token';
 
-    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://path402.com').trim();
+    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://path401.com').trim();
     const appId = process.env.HANDCASH_APP_ID?.trim();
     const appSecret = process.env.HANDCASH_APP_SECRET?.trim();
 
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('HandCash callback error:', error);
-    const errorUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://path402.com').trim();
+    const errorUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://path401.com').trim();
     return NextResponse.redirect(`${errorUrl}/token?error=callback_failed`);
   }
 }
