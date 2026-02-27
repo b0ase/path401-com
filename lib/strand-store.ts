@@ -22,6 +22,12 @@ export interface Strand {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  // Extended fields for all strand types
+  strandType: string;
+  strandSubtype: string | null;
+  signatureId: string | null;
+  label: string | null;
+  source: string;
 }
 
 // In-memory fallback storage
@@ -50,6 +56,11 @@ function mapDbRow(row: Record<string, unknown>): Strand {
     isActive: row.is_active as boolean,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
+    strandType: (row.strand_type as string) || 'oauth',
+    strandSubtype: row.strand_subtype as string | null,
+    signatureId: row.signature_id as string | null,
+    label: row.label as string | null,
+    source: (row.source as string) || 'path401',
   };
 }
 
@@ -107,6 +118,11 @@ export async function createStrand(params: {
     isActive: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    strandType: 'oauth',
+    strandSubtype: null,
+    signatureId: null,
+    label: null,
+    source: 'path401',
   };
 
   memoryStrands.set(strand.id, strand);

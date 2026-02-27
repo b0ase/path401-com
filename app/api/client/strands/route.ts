@@ -12,7 +12,14 @@ export async function GET(request: NextRequest) {
   const count = await getStrandCount(auth.identity.id);
 
   return NextResponse.json({
-    strands,
+    strands: strands.map(s => ({
+      ...s,
+      // Ensure strand_type and source are always present in response
+      strandType: s.strandType || 'oauth',
+      strandSubtype: s.strandSubtype || null,
+      label: s.label || null,
+      source: s.source || 'path401',
+    })),
     count,
     identity: {
       id: auth.identity.id,
