@@ -4,17 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
-interface RouteParams {
-  params: {
-    identityTokenId: string;
-  };
-}
-
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ identityTokenId: string }> }
+) {
   try {
-    const { identityTokenId } = params;
+    const { identityTokenId } = await params;
 
     if (!identityTokenId) {
       return NextResponse.json(
@@ -23,7 +20,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const supabase = createAdminClient();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
 
     // Get the most recent KYC session for this identity
     const { data: session, error } = await supabase

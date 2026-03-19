@@ -5,9 +5,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createHmac, randomBytes } from 'crypto';
-import { createAdminClient } from '@/lib/supabase';
-import { bsv } from 'bsv';
+import { validateVeriffHmac, scrubVeriffDecision } from '@b0ase/bit-sign';
+import { randomBytes } from 'crypto';
+import { supabase } from '@/lib/supabase';
 
 const VERIFF_WEBHOOK_SECRET = process.env.VERIFF_WEBHOOK_SECRET || '';
 const TREASURY_ADDRESS = process.env.TREASURY_ADDRESS || '';
@@ -20,11 +20,7 @@ export async function POST(request: NextRequest) {
     // Verify HMAC signature
     if (VERIFF_WEBHOOK_SECRET) {
       const signature = request.headers.get('x-hmac-signature') || '';
-      const expected = createHmac('sha256', VERIFF_WEBHOOK_SECRET)
-        .update(rawBody)
-        .digest('hex');
-
-      if (signature.toLowerCase() !== expected.toLowerCase()) {
+      if (!validateVeriffHmac(rawBody, signature, VERIFF_WEBHOOK_SECRET)) {
         console.error('[kyc-veriff-webhook] HMAC mismatch');
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
       }
@@ -43,7 +39,10 @@ export async function POST(request: NextRequest) {
 
     console.log(`[kyc-veriff-webhook] Decision: session=${sessionId} status=${status}`);
 
-    const supabase = createAdminClient();
+    if (!supabase) {
+      console.error('[kyc-veriff-webhook] Database not configured');
+      return NextResponse.json({ ok: true });
+    }
 
     // Look up our session record
     const { data: session, error: sessionError } = await supabase
@@ -62,27 +61,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    // Scrub sensitive data
-    const safePayload = {
-      status,
-      person: verification.person
-        ? {
-            firstName: verification.person.firstName,
-            lastName: verification.person.lastName,
-            dateOfBirth: verification.person.dateOfBirth,
-          }
-        : null,
-      document: verification.document
-        ? {
-            type: verification.document.type,
-            country: verification.document.country,
-            numberSuffix: verification.document.number
-              ? verification.document.number.slice(-4)
-              : null,
-          }
-        : null,
-      decisionTime: new Date().toISOString(),
-    };
+    // Scrub sensitive data using @b0ase/bit-sign utility
+    const safePayload = scrubVeriffDecision(payload);
 
     // Update session with decision
     await supabase

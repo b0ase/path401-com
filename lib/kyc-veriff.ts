@@ -1,7 +1,9 @@
 /**
  * Veriff KYC integration for creating Level 4 (kyc/veriff) strands
- * Manages the flow from initiation through Veriff redirect and webhook callback
+ * Uses @b0ase/bit-sign utilities for shared validation and payload building
  */
+
+import type { KYCSessionStatus } from '@b0ase/bit-sign';
 
 interface StartKycSessionResponse {
   success: boolean;

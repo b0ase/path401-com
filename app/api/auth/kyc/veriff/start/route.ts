@@ -7,7 +7,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase';
+import { buildVeriffSessionPayload } from '@b0ase/bit-sign';
+import { supabase } from '@/lib/supabase';
 
 const VERIFF_API_KEY = process.env.VERIFF_API_KEY || '';
 const VERIFF_API_URL = 'https://stationapi.veriff.com/v1/sessions';
@@ -38,7 +39,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createAdminClient();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
 
     // Validate identity token exists
     const { data: identityToken, error: tokenError } = await supabase
@@ -70,19 +73,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initiate Veriff session
-    const veriffPayload = {
-      verification: {
-        callback: VERIFF_CALLBACK_URL,
-        vendorData: JSON.stringify({
-          identity_token_id,
-          holder_id: identityToken.holder_id,
-          handle: identityToken.handle,
-          purpose: 'path401_kyc_strand',
-          timestamp: new Date().toISOString(),
-        }),
+    // Initiate Veriff session using @b0ase/bit-sign payload builder
+    const veriffPayload = buildVeriffSessionPayload({
+      callbackUrl: VERIFF_CALLBACK_URL,
+      vendorData: {
+        identity_token_id,
+        holder_id: identityToken.holder_id,
+        handle: identityToken.handle,
+        purpose: 'path401_kyc_strand',
+        timestamp: new Date().toISOString(),
       },
-    };
+    });
 
     console.log('[kyc-veriff-start] Calling Veriff API:', {
       url: VERIFF_API_URL,
