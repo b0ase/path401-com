@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { buildVeriffSessionPayload } from '@b0ase/bit-sign';
+import { buildVeriffSessionPayload } from '@/lib/kyc-veriff';
 import { supabase } from '@/lib/supabase';
 
 const VERIFF_API_KEY = process.env.VERIFF_API_KEY || '';

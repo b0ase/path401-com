@@ -1,78 +1,66 @@
 /**
- * Veriff KYC integration for creating Level 4 (kyc/veriff) strands
- * Uses @b0ase/bit-sign utilities for shared validation and payload building
+ * Veriff KYC utilities for path401-com
+ * These functions were previously imported from @b0ase/bit-sign
  */
 
-import type { KYCSessionStatus } from '@b0ase/bit-sign';
+import { createHmac } from 'crypto';
 
-interface StartKycSessionResponse {
-  success: boolean;
-  verification_url?: string;
-  session_id?: string;
-  message?: string;
-  error?: string;
-}
-
-export async function startKycSession(
-  identityTokenId: string
-): Promise<StartKycSessionResponse> {
-  try {
-    const response = await fetch('/api/auth/kyc/veriff/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identity_token_id: identityTokenId }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('[kyc] Start session failed:', error);
-      return {
-        success: false,
-        error: error.error || 'Failed to start KYC session',
-      };
-    }
-
-    const data: StartKycSessionResponse = await response.json();
-
-    if (data.verification_url) {
-      // Redirect to Veriff
-      window.location.href = data.verification_url;
-    }
-
-    return data;
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[kyc] Unexpected error:', msg);
-    return {
-      success: false,
-      error: `Unexpected error: ${msg}`,
-    };
-  }
+/**
+ * Build the payload for Veriff session creation
+ */
+export function buildVeriffSessionPayload(opts: {
+  callbackUrl: string;
+  vendorData?: Record<string, any>;
+}) {
+  return {
+    verification: {
+      callback_url: opts.callbackUrl,
+      vendor_data: JSON.stringify(opts.vendorData || {}),
+    },
+  };
 }
 
 /**
- * Check KYC session status by session ID
- * Used to poll for webhook callback completion
+ * Validate Veriff webhook HMAC signature
+ * Server-only: uses node:crypto
  */
-export async function checkKycSessionStatus(
-  identityTokenId: string
-): Promise<{ status?: string; approved?: boolean; error?: string }> {
-  try {
-    const response = await fetch(`/api/auth/kyc/veriff/status/${identityTokenId}`, {
-      method: 'GET',
-    });
+export function validateVeriffHmac(
+  rawBody: string,
+  signature: string,
+  secret: string
+): boolean {
+  if (!secret) return false;
 
-    if (!response.ok) {
-      return { error: 'Failed to fetch KYC status' };
-    }
+  const hash = createHmac('sha256', secret)
+    .update(rawBody)
+    .digest('hex');
 
-    const data = await response.json();
-    return {
-      status: data.status,
-      approved: data.status === 'approved',
-    };
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Unknown error';
-    return { error: msg };
-  }
+  // Case-insensitive comparison
+  return hash.toLowerCase() === signature.toLowerCase();
+}
+
+/**
+ * Scrub sensitive PII from Veriff decision payload
+ * Keeps only name, DOB, document type/country, last 4 of doc number
+ */
+export function scrubVeriffDecision(payload: any) {
+  return {
+    verification: {
+      id: payload.verification?.id,
+      status: payload.verification?.status,
+      person: payload.verification?.person ? {
+        firstName: payload.verification.person.firstName,
+        lastName: payload.verification.person.lastName,
+        dateOfBirth: payload.verification.person.dateOfBirth,
+      } : undefined,
+      document: payload.verification?.document ? {
+        type: payload.verification.document.type,
+        country: payload.verification.document.country,
+        // Keep only last 4 chars of number for audit trail
+        number: payload.verification.document.number
+          ? '****' + payload.verification.document.number.slice(-4)
+          : undefined,
+      } : undefined,
+    },
+  };
 }

@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { validateVeriffHmac, scrubVeriffDecision } from '@b0ase/bit-sign';
+import { validateVeriffHmac, scrubVeriffDecision } from '@/lib/kyc-veriff';
 import { randomBytes } from 'crypto';
 import { supabase } from '@/lib/supabase';
 
