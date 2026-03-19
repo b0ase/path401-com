@@ -85,10 +85,10 @@ export async function POST(request: NextRequest) {
         broadcast_status: 'pending_inscription' as const,
         metadata: {
           provider_id: sessionId,
-          first_name: safePayload.person?.firstName,
-          last_name: safePayload.person?.lastName,
-          document_type: safePayload.document?.type,
-          document_country: safePayload.document?.country,
+          first_name: safePayload.verification.person?.firstName,
+          last_name: safePayload.verification.person?.lastName,
+          document_type: safePayload.verification.document?.type,
+          document_country: safePayload.verification.document?.country,
         },
       };
 
