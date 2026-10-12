@@ -6,7 +6,7 @@
 'use client';
 
 import { useState } from 'react';
-import { startKycSession } from '@/lib/kyc-veriff';
+import { startKycSession } from '@/lib/kyc-client';
 
 interface KycVeriffButtonProps {
   identityTokenId: string;
