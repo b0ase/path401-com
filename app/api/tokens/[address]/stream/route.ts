@@ -7,7 +7,10 @@ import type { UsagePricing, AccessMode } from '@/lib/tokens/types';
 
 function getSupabase() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // Service key only, never the anon key (fail closed). Deliberately NOT repointed to lib/supabase: this project has no
+  // SUPABASE_SERVICE_ROLE_KEY, so the token routes stay off until they are reviewed as money paths
+  // (api/tokens/transfer trusts an unauthenticated x-wallet-handle header).
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !supabaseKey) {
     throw new Error('Supabase environment variables not configured');
   }

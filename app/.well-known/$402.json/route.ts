@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { calculatePrice } from '@/lib/tokens/pricing';
 import type { PricingModel } from '@/lib/tokens/types';
 import { PAYMENT_ADDRESS } from '@/lib/store';
 
-function getSupabase() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Supabase environment variables not configured');
-  }
-  return createClient(supabaseUrl, supabaseKey);
-}
+/** The only token columns this public document reads (treasury_balance feeds the published current_price). */
+const PUBLIC_TOKEN_COLUMNS =
+  'address, inscription_id, parent_address, parent_share_bps, pricing_model, base_price_sats, treasury_balance, access_mode, usage_pricing';
 
 function getDomain(request: NextRequest): string {
   const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
@@ -22,17 +17,21 @@ export async function GET(request: NextRequest) {
   try {
     const domain = getDomain(request);
     const rootPath = `$${domain}`;
-    const supabase = getSupabase();
+    // Read-only discovery document. Uses lib/supabase (SUPABASE_URL + SUPABASE_SERVICE_KEY, the env this project
+    // has in prod) and selects only the public columns it publishes. No key = 503, never a fallback.
+    if (!supabase) {
+      return NextResponse.json({ error: 'Discovery temporarily unavailable' }, { status: 503 });
+    }
 
     const { data: rootToken } = await supabase
       .from('tokens')
-      .select('*')
+      .select(PUBLIC_TOKEN_COLUMNS)
       .eq('address', rootPath)
-      .single();
+      .maybeSingle();
 
     const { data: children } = await supabase
       .from('tokens')
-      .select('address, inscription_id, parent_address, parent_share_bps, pricing_model, base_price_sats, treasury_balance, access_mode, usage_pricing')
+      .select(PUBLIC_TOKEN_COLUMNS)
       .ilike('address', `${rootPath}/%`)
       .limit(200);
 
