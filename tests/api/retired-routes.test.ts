@@ -20,6 +20,9 @@ const RETIRED: Record<string, string[]> = {
   'app/api/tokens/transfer/route.ts': ['POST'],
   'app/api/tokens/[address]/stream/route.ts': ['GET', 'POST'],
   'app/api/tokens/[address]/bridge/route.ts': ['POST'],
+  'app/api/domain/verify-inscribe/route.ts': ['POST'],
+  'app/api/uhrp/advertise/route.ts': ['POST'],
+  'app/api/x402/inscription/route.ts': ['POST'],
   'app/api/tokens/route.ts': ['POST'],
   'app/api/tokens/[address]/route.ts': ['POST'],
 };
@@ -61,7 +64,8 @@ describe('retired routes answer 410 to everything', () => {
 
   it('fully retired route files keep no logic (no db, keys, env or headers)', () => {
     for (const file of Object.keys(RETIRED)) {
-      if (!existsSync(file) || file === 'app/api/tokens/route.ts' || file === 'app/api/tokens/[address]/route.ts') continue;
+      // POST-only retirements keep their read-only GET
+      if (!existsSync(file) || ['app/api/tokens/route.ts', 'app/api/tokens/[address]/route.ts', 'app/api/x402/inscription/route.ts'].includes(file)) continue;
       const src = readFileSync(file, 'utf8');
       expect(src).not.toMatch(/supabase|process\.env|headers\.get|decryptWif|createClient|from\('/);
     }
